@@ -1,6 +1,6 @@
 import * as Applicant from './service';
 import { signUp, addTypeByEmail } from '../accounts/controller';
-import { ApplicantData, IApplicant } from './model';
+import { ApplicantData } from './model';
 
 /**
  * Registers a new applicant.
@@ -76,4 +76,26 @@ export async function getApplicantByEmail(
       throw err;
     });
   return data;
+}
+
+export async function updateProfilePicture(email: string, picture: string) {
+  await Applicant.updateProfilePicture(email, picture).catch((err) => {
+    throw err;
+  });
+}
+export async function updateNationalIDPhotoFace(
+  email: string,
+  picture: string,
+) {
+  await Applicant.updateNationalIDPhotoFace(email, picture).catch((err) => {
+    throw err;
+  });
+}
+export async function updateNationalIDPhotoBack(
+  email: string,
+  picture: string,
+) {
+  await Applicant.updateNationalIDPhotoBack(email, picture).catch((err) => {
+    throw err;
+  });
 }

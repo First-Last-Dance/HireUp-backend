@@ -32,16 +32,13 @@ async function comparePasswords(
 }
 
 /**
- * Generates a JSON Web Token (JWT) with the given username.
- * @param userName The username to be encoded in the JWT.
+ * Generates a JSON Web Token (JWT) with the given email.
+ * @param email The email to be encoded in the JWT.
  * @returns The generated JWT.
  */
-function generateJWT(userName: string): string {
+function generateJWT(email: string): string {
   dotenv.config();
-  return jwt.sign(
-    { userName },
-    process.env.JWT_SECRET as unknown as jwt.Secret,
-  );
+  return jwt.sign({ email }, process.env.JWT_SECRET as unknown as jwt.Secret);
 }
 
 /**
@@ -174,7 +171,7 @@ export async function getPasswordByEmail(
  * @returns A promise that resolves to true if the email is available, false otherwise.
  */
 export async function isEmailAvailable(email: string): Promise<boolean> {
-  return await Account.isEmailAvailable(email).catch((err) => {
+  return Account.isEmailAvailable(email).catch((err) => {
     throw err;
   });
 }

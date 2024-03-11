@@ -1,14 +1,39 @@
 import express from 'express';
+import multer from 'multer';
 import * as Applicant from './controller';
 import { CodedError } from '../util/error';
+import { requireAuth } from '../util/authentication';
 
 const applicantRoutes = express.Router();
+
+// Multer file filter to handle wrong file names
+const fileFilter = (req: any, file: any, cb: any) => {
+  if (file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+    // Accept the file
+    cb(null, true);
+  } else {
+    // Reject the file
+    cb(new Error('Invalid file type'), false);
+  }
+};
+const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter,
+});
+
+/**
+ * @swagger
+ * tags:
+ *   name: Applicant
+ *   description: API endpoints for managing applicants
+ */
 
 /**
  * @swagger
  * /applicant/register:
  *   post:
  *     summary: Register a new applicant.
+ *     tags: [Applicant]
  *     requestBody:
  *       required: true
  *       content:
@@ -98,6 +123,7 @@ applicantRoutes.post('/register', async (req, res) => {
  * /applicant:
  *   get:
  *     summary: Get applicant details by email.
+ *     tags: [Applicant]
  *     parameters:
  *       - in: query
  *         name: email
@@ -132,5 +158,182 @@ applicantRoutes.get('/', async (req, res) => {
       });
   }
 });
+
+// Route to handle uploading profile picture
+/**
+ * @swagger
+ * /applicant/profilePicture:
+ *   post:
+ *     summary: Upload profile picture for authenticated applicant.
+ *     tags: [Applicant]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               profilePicture:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       '200':
+ *         description: Profile picture uploaded successfully.
+ *       '400':
+ *         description: Bad request. Missing or invalid parameters.
+ *       '401':
+ *         description: Unauthorized. Invalid credentials.
+ *       '500':
+ *         description: Internal server error.
+ */
+applicantRoutes.post(
+  '/profilePicture',
+  requireAuth, // Middleware to require authentication
+  upload.single('profilePicture'), // Middleware to handle file upload
+  async (req, res) => {
+    if (req.file) {
+      const photo = req.file.buffer;
+      const base64String = photo.toString('base64');
+      // Call controller function to update profile picture
+      await Applicant.updateProfilePicture(res.locals.email, base64String)
+        .then(() => {
+          res.status(200).send('Profile picture uploaded successfully.');
+        })
+        .catch((err) => {
+          if (err instanceof CodedError) {
+            res.status(err.code).send(err.message);
+          } else {
+            res.status(500).send(err);
+          }
+        });
+    }
+  },
+);
+
+// Route to handle uploading national ID photo face
+/**
+ * @swagger
+ * /applicant/nationalIDPhotoFace:
+ *   post:
+ *     summary: Upload national ID photo face for authenticated applicant.
+ *     tags: [Applicant]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nationalIDPhotoFace:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       '200':
+ *         description: National ID photo face uploaded successfully.
+ *       '400':
+ *         description: Bad request. Missing or invalid parameters.
+ *       '401':
+ *         description: Unauthorized. Invalid credentials.
+ *       '500':
+ *         description: Internal server error.
+ */
+applicantRoutes.post(
+  '/nationalIDPhotoFace',
+  requireAuth, // Middleware to require authentication
+  upload.single('nationalIDPhotoFace'), // Middleware to handle file upload
+  async (req, res) => {
+    if (req.file) {
+      const photo = req.file.buffer;
+      const base64String = photo.toString('base64');
+      // Call controller function to update national ID photo face
+      await Applicant.updateNationalIDPhotoFace(res.locals.email, base64String)
+        .then(() => {
+          res.status(200).send('National ID photo face uploaded successfully.');
+        })
+        .catch((err) => {
+          if (err instanceof CodedError) {
+            res.status(err.code).send(err.message);
+          } else {
+            res.status(500).send(err);
+          }
+        });
+    }
+  },
+);
+
+// Route to handle uploading national ID photo back
+/**
+ * @swagger
+ * /applicant/nationalIDPhotoBack:
+ *   post:
+ *     summary: Upload national ID photo back for authenticated applicant.
+ *     tags: [Applicant]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nationalIDPhotoBack:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       '200':
+ *         description: National ID photo back uploaded successfully.
+ *       '400':
+ *         description: Bad request. Missing or invalid parameters.
+ *       '401':
+ *         description: Unauthorized. Invalid credentials.
+ *       '500':
+ *         description: Internal server error.
+ */
+applicantRoutes.post(
+  '/nationalIDPhotoBack',
+  requireAuth, // Middleware to require authentication
+  upload.single('nationalIDPhotoBack'), // Middleware to handle file upload
+  async (req, res) => {
+    if (req.file) {
+      const photo = req.file.buffer;
+      const base64String = photo.toString('base64');
+      // Call controller function to update national ID photo back
+      await Applicant.updateNationalIDPhotoBack(res.locals.email, base64String)
+        .then(() => {
+          res.status(200).send('National ID photo back uploaded successfully.');
+        })
+        .catch((err) => {
+          if (err instanceof CodedError) {
+            res.status(err.code).send(err.message);
+          } else {
+            res.status(500).send(err);
+          }
+        });
+    }
+  },
+);
+
+// Error handling middleware
+applicantRoutes.use(
+  (
+    err: Error,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    if (err instanceof multer.MulterError) {
+      // Handle Multer errors
+      res.status(400).send(`Multer error: ${err.message}`);
+    } else {
+      // Handle other errors
+      res.status(500).send(`Server error: ${err.message}`);
+    }
+  },
+);
 
 export default applicantRoutes;

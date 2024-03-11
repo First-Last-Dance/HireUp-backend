@@ -1,5 +1,5 @@
 import { CodedError, ErrorCode, ErrorMessage } from '../util/error';
-import ApplicantModel, { ApplicantData, IApplicant } from './model';
+import ApplicantModel, { IApplicant } from './model';
 
 /**
  * Deletes an applicant by email.
@@ -115,4 +115,58 @@ export async function addApplicant(
     nationalIDNumber,
   });
   return newAccount.save();
+}
+
+export async function updateProfilePicture(
+  email: string,
+  picture: string,
+): Promise<void> {
+  if (await isEmailAvailable(email)) {
+    throw new CodedError(
+      ErrorMessage.AccountNotFound,
+      ErrorCode.AccountNotFound,
+    );
+  }
+  await ApplicantModel.findOneAndUpdate(
+    { email },
+    { profilePhoto: picture },
+  ).catch((err) => {
+    throw err;
+  });
+}
+
+export async function updateNationalIDPhotoFace(
+  email: string,
+  picture: string,
+): Promise<void> {
+  if (await isEmailAvailable(email)) {
+    throw new CodedError(
+      ErrorMessage.AccountNotFound,
+      ErrorCode.AccountNotFound,
+    );
+  }
+  await ApplicantModel.findOneAndUpdate(
+    { email },
+    { nationalIDPhotoFace: picture },
+  ).catch((err) => {
+    throw err;
+  });
+}
+
+export async function updateNationalIDPhotoBack(
+  email: string,
+  picture: string,
+): Promise<void> {
+  if (await isEmailAvailable(email)) {
+    throw new CodedError(
+      ErrorMessage.AccountNotFound,
+      ErrorCode.AccountNotFound,
+    );
+  }
+  await ApplicantModel.findOneAndUpdate(
+    { email },
+    { nationalIDPhotoBack: picture },
+  ).catch((err) => {
+    throw err;
+  });
 }

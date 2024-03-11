@@ -33,7 +33,7 @@ export enum ErrorMessage {
   mainRefereeBusy = 'Main referee is busy that day',
   firstLinesmanBusy = 'First Linesman is busy that day',
   secondLinesmanBusy = 'Second Linesman is busy that day',
-  CanNotCancel = 'can not cancle reserveation',
+  CanNotCancel = 'can not cancel reservation',
   InternalServerError = 'internal server error',
 }
 
@@ -41,7 +41,7 @@ export enum ErrorMessage {
 export enum ErrorCode {
   AccountNotFound = 400,
   InvalidParameter = 400,
-  Missingparameter = 400,
+  MissingParameter = 400,
   AuthenticationError = 401,
   AlreadyExist = 400,
   UserAlreadyAuthorized = 400,

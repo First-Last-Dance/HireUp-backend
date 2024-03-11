@@ -5,9 +5,9 @@ import * as dotenv from 'dotenv';
 import { isAccountAdmin } from '../accounts/service';
 
 interface JwtPayload {
-  userName: string;
-  admin: boolean;
-  authorized: boolean;
+  email: string;
+  // admin: boolean;
+  // verified: boolean;
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
@@ -31,7 +31,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
           .status(500)
           .send({ auth: false, message: 'Failed to authenticate.' });
       }
-      res.locals.userName = (decoded as JwtPayload).userName;
+      res.locals.email = (decoded as JwtPayload).email;
       return next();
     },
   );
@@ -52,7 +52,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 //     .catch((err) => res.status(500).send(err));
 // }
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  isAccountAdmin(res.locals.userName)
+  isAccountAdmin(res.locals.email)
     .then((admin) => {
       if (admin) {
         return next();
