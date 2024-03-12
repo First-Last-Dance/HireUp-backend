@@ -53,17 +53,21 @@ const accountRoutes = express.Router();
  *         description: Internal server error
  */
 accountRoutes.post('/logIn', async (req, res) => {
-  if (!req.body.email) {
+  const { email, password } = req.body;
+  if (!email) {
     res.status(400).send('email is required');
   }
-  if (!req.body.password) {
+  if (!password) {
     res.status(400).send('Password is required');
   } else {
-    await Account.signIn(req.body.email, req.body.password)
+    await Account.signIn(email, password)
       .then((result) => {
-        res
-          .status(200)
-          .send({ auth: true, token: result.jwt, type: result.type });
+        res.status(200).send({
+          auth: true,
+          token: result.jwt,
+          type: result.type,
+          email: email,
+        });
       })
       .catch((err) => {
         if (err instanceof CodedError) {

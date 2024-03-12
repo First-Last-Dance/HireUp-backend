@@ -71,6 +71,9 @@ export async function getApplicantByEmail(
       data.lastName = res.lastName;
       data.phoneNumber = res.phoneNumber;
       data.nationalIDNumber = res.nationalIDNumber;
+      data.profilePhoto = res.profilePhoto;
+      data.nationalIDPhotoFace = res.nationalIDPhotoFace;
+      data.nationalIDPhotoBack = res.nationalIDPhotoBack;
     })
     .catch((err) => {
       throw err;

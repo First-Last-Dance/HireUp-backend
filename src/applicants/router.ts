@@ -103,7 +103,9 @@ applicantRoutes.post('/register', async (req, res) => {
     )
       .then((jwt) => {
         if (jwt !== '') {
-          res.status(200).send({ auth: true, token: jwt, type });
+          res
+            .status(200)
+            .send({ auth: true, token: jwt, type: type, email: email });
         } else {
           res.status(500).send('Internal Server Error');
         }
@@ -122,41 +124,31 @@ applicantRoutes.post('/register', async (req, res) => {
  * @swagger
  * /applicant:
  *   get:
- *     summary: Get applicant details by email.
+ *     summary: Get applicant details.
  *     tags: [Applicant]
- *     parameters:
- *       - in: query
- *         name: email
- *         required: true
- *         schema:
- *           type: string
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       '200':
  *         description: Applicant details retrieved successfully.
- *       '400':
- *         description: Bad request. Missing or invalid parameters.
  *       '401':
  *         description: Unauthorized. Invalid credentials.
  *       '500':
  *         description: Internal server error.
  */
-applicantRoutes.get('/', async (req, res) => {
-  const { email } = req.query;
-  if (!email) {
-    res.status(400).send('email is required');
-  } else {
-    await Applicant.getApplicantByEmail(email as string)
-      .then((data) => {
-        res.status(200).send(data);
-      })
-      .catch((err) => {
-        if (err instanceof CodedError) {
-          res.status(err.code).send(err.message);
-        } else {
-          res.status(500).send(err);
-        }
-      });
-  }
+applicantRoutes.get('/', requireAuth, async (req, res) => {
+  const email = res.locals.email;
+  await Applicant.getApplicantByEmail(email as string)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      if (err instanceof CodedError) {
+        res.status(err.code).send(err.message);
+      } else {
+        res.status(500).send(err);
+      }
+    });
 });
 
 // Route to handle uploading profile picture
