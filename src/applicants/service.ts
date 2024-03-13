@@ -117,6 +117,12 @@ export async function addApplicant(
   return newAccount.save();
 }
 
+/**
+ * Updates the profile picture of an applicant.
+ * @param email The email of the applicant.
+ * @param picture The base64 encoded string of the profile picture.
+ * @throws CodedError if the applicant is not found.
+ */
 export async function updateProfilePicture(
   email: string,
   picture: string,
@@ -135,6 +141,12 @@ export async function updateProfilePicture(
   });
 }
 
+/**
+ * Updates the national ID photo (front side) of an applicant.
+ * @param email The email of the applicant.
+ * @param picture The base64 encoded string of the national ID photo (front side).
+ * @throws CodedError if the applicant is not found.
+ */
 export async function updateNationalIDPhotoFace(
   email: string,
   picture: string,
@@ -153,6 +165,12 @@ export async function updateNationalIDPhotoFace(
   });
 }
 
+/**
+ * Updates the national ID photo (back side) of an applicant.
+ * @param email The email of the applicant.
+ * @param picture The base64 encoded string of the national ID photo (back side).
+ * @throws CodedError if the applicant is not found.
+ */
 export async function updateNationalIDPhotoBack(
   email: string,
   picture: string,

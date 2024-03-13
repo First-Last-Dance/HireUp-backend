@@ -81,11 +81,22 @@ export async function getApplicantByEmail(
   return data;
 }
 
+/**
+ * Updates the profile picture of an applicant.
+ * @param email The email of the applicant.
+ * @param picture The base64 encoded string of the profile picture.
+ */
 export async function updateProfilePicture(email: string, picture: string) {
   await Applicant.updateProfilePicture(email, picture).catch((err) => {
     throw err;
   });
 }
+
+/**
+ * Updates the national ID photo (front side) of an applicant.
+ * @param email The email of the applicant.
+ * @param picture The base64 encoded string of the national ID photo (front side).
+ */
 export async function updateNationalIDPhotoFace(
   email: string,
   picture: string,
@@ -94,6 +105,12 @@ export async function updateNationalIDPhotoFace(
     throw err;
   });
 }
+
+/**
+ * Updates the national ID photo (back side) of an applicant.
+ * @param email The email of the applicant.
+ * @param picture The base64 encoded string of the national ID photo (back side).
+ */
 export async function updateNationalIDPhotoBack(
   email: string,
   picture: string,

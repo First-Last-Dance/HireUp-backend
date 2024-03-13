@@ -29,7 +29,7 @@ export interface IApplicant extends mongoose.Document {
 }
 
 // Define the schema for the applicant collection
-const ApplicantSchema = new Schema({
+const applicantSchema = new Schema({
   email: { type: String, required: true, unique: true }, // Email field is required and unique
   firstName: { type: String, required: true }, // First name field is required
   middleName: { type: String, required: true }, // Middle name field is required
@@ -42,6 +42,6 @@ const ApplicantSchema = new Schema({
 });
 
 // Create a mongoose model based on the schema
-const ApplicantModel = mongoose.model<IApplicant>('Applicant', ApplicantSchema);
+const ApplicantModel = mongoose.model<IApplicant>('Applicant', applicantSchema);
 
 export default ApplicantModel;
