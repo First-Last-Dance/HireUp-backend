@@ -1,6 +1,8 @@
 import * as Applicant from './service';
 import { signUp, addTypeByEmail } from '../accounts/controller';
 import { ApplicantData } from './model';
+import { getSkillsIDs } from '../skills/controller';
+import { ISkill } from '../skills/model'; // Import the 'Skill' type from the appropriate module.
 
 /**
  * Registers a new applicant.
@@ -63,6 +65,7 @@ export async function getApplicantByEmail(
   email: string,
 ): Promise<ApplicantData> {
   const data: ApplicantData = {};
+  const skillsNames: string[] = [];
   await Applicant.getApplicantByEmail(email)
     .then(async (res) => {
       data.email = res.email;
@@ -74,6 +77,10 @@ export async function getApplicantByEmail(
       data.profilePhoto = res.profilePhoto;
       data.nationalIDPhotoFace = res.nationalIDPhotoFace;
       data.nationalIDPhotoBack = res.nationalIDPhotoBack;
+      res.skills.forEach((skill) => {
+        skillsNames.push((skill as unknown as ISkill).name);
+      });
+      data.skills = skillsNames;
     })
     .catch((err) => {
       throw err;
@@ -116,6 +123,18 @@ export async function updateNationalIDPhotoBack(
   picture: string,
 ) {
   await Applicant.updateNationalIDPhotoBack(email, picture).catch((err) => {
+    throw err;
+  });
+}
+
+export async function updateApplicantSkills(
+  email: string,
+  skillsNames: string[],
+) {
+  const skillsIDs = await getSkillsIDs(skillsNames).catch((err) => {
+    throw err;
+  });
+  await Applicant.updateApplicantSkills(email, skillsIDs).catch((err) => {
     throw err;
   });
 }

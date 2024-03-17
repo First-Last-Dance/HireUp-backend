@@ -13,6 +13,7 @@ export interface ApplicantData {
   profilePhoto?: string;
   nationalIDPhotoFace?: string;
   nationalIDPhotoBack?: string;
+  skills?: string[]; // Reference to Skills model
 }
 
 // Interface representing a mongoose document for an applicant
@@ -26,6 +27,7 @@ export interface IApplicant extends mongoose.Document {
   profilePhoto: string;
   nationalIDPhotoFace: string;
   nationalIDPhotoBack: string;
+  skills: { type: mongoose.Types.ObjectId; ref: 'Skill' }[]; // Reference to Skills model
 }
 
 // Define the schema for the applicant collection
@@ -39,6 +41,7 @@ const applicantSchema = new Schema({
   profilePhoto: { type: String, default: '' }, // Default profile photo is an empty string
   nationalIDPhotoFace: { type: String, default: '' }, // Default national ID photo (face) is an empty string
   nationalIDPhotoBack: { type: String, default: '' }, // Default national ID photo (back) is an empty string
+  skills: [{ type: mongoose.Types.ObjectId, ref: 'Skill' }], // Reference to Skills model
 });
 
 // Create a mongoose model based on the schema

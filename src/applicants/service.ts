@@ -24,9 +24,14 @@ export async function getAllApplicants(): Promise<IApplicant[]> {
  * @throws CodedError if the applicant is not found.
  */
 export async function getApplicantByEmail(email: string): Promise<IApplicant> {
-  const applicant = await ApplicantModel.findOne({ email }).catch((err) => {
-    throw err;
-  });
+  const applicant = await ApplicantModel.findOne({ email })
+    .populate({
+      path: 'skills',
+      select: 'name -_id',
+    })
+    .catch((err) => {
+      throw err;
+    });
   if (!applicant) {
     throw new CodedError(
       ErrorMessage.AccountNotFound,
@@ -135,7 +140,7 @@ export async function updateProfilePicture(
   }
   await ApplicantModel.findOneAndUpdate(
     { email },
-    { profilePhoto: picture },
+    { profilePhoto: picture, skills: ['65f17a8d859c05811a50453c'] },
   ).catch((err) => {
     throw err;
   });
@@ -187,4 +192,15 @@ export async function updateNationalIDPhotoBack(
   ).catch((err) => {
     throw err;
   });
+}
+
+export async function updateApplicantSkills(
+  email: string,
+  skillsIDs: string[],
+) {
+  await ApplicantModel.findOneAndUpdate({ email }, { skills: skillsIDs }).catch(
+    (err) => {
+      throw err;
+    },
+  );
 }

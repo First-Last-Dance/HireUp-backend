@@ -310,6 +310,50 @@ applicantRoutes.post(
   },
 );
 
+/**
+ * @swagger
+ * /applicant/updateSkills:
+ *   post:
+ *     summary: Update applicant skills
+ *     description: This can only be done by the logged in applicant.
+ *     tags: [Applicant]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               skills:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       '200':
+ *         description: Skills updated successfully.
+ *       '400':
+ *         description: Bad request.
+ *       '500':
+ *         description: Server error.
+ */
+applicantRoutes.post('/updateSkills', requireAuth, async (req, res) => {
+  const email = res.locals.email;
+  const { skills } = req.body;
+  await Applicant.updateApplicantSkills(email, skills)
+    .then(() => {
+      res.status(200).send('Skills updated successfully.');
+    })
+    .catch((err) => {
+      if (err instanceof CodedError) {
+        res.status(err.code).send(err.message);
+      } else {
+        res.status(500).send(err);
+      }
+    });
+});
+
 // Error handling middleware
 applicantRoutes.use(
   (
