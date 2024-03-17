@@ -4,11 +4,13 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "npm run build && node ./dist/seed.js && node ./dist/app.js",
+    "start": "npm run build && npm run seed && node ./dist/app.js",
     "lint": "eslint --fix src/**/*.ts",
     "prettier": "prettier --config .prettierrc src/**/*.ts --write",
     "build": "npx tsc",
-    "dev": "ts-node ./src/seed.ts && npx ts-node-dev --respawn --transpile-only ./src/app.ts"
+    "dev": "npm run seedTS && npx ts-node-dev --respawn --transpile-only ./src/app.ts",
+    "seedTS": "ts-node ./src/seeds/admin.ts && ts-node ./src/seeds/skills.ts",
+    "seed": "ts-node ./dist/seeds/admin.js && ts-node ./dist/seeds/skills.js"
   },
   "author": "Amr",
   "license": "ISC",
