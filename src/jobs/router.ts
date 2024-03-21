@@ -137,6 +137,10 @@ jobRoutes.get('/availableJobs', async (req, res) => {
   }
   const startIndex = (parseInt(page as string) - 1) * parseInt(limit as string);
   const endIndex = parseInt(page as string) * parseInt(limit as string);
+  const numberOfAvailableJobs = await Job.getNumberOfAvailableJobs();
+  const pagesCount = Math.ceil(
+    numberOfAvailableJobs / parseInt(limit as string),
+  );
   await Job.getAllAvailableJobs(
     parseInt(limit as string),
     parseInt(page as string),
@@ -146,10 +150,12 @@ jobRoutes.get('/availableJobs', async (req, res) => {
         previous?: { page: number; limit: number };
         next?: { page: number; limit: number };
         jobs: JobData[];
+        pages: { count: number; limit: number };
       } = {
         jobs: jobs,
+        pages: { count: pagesCount, limit: parseInt(limit as string) },
       };
-      if (endIndex < (await Job.getNumberOfAvailableJobs())) {
+      if (endIndex < numberOfAvailableJobs) {
         results.next = {
           page: parseInt(page as string) + 1,
           limit: parseInt(limit as string),
