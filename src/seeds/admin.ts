@@ -2,8 +2,6 @@ import mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
 import Account from '../accounts/model';
 import Applicant from '../applicants/model';
-import Company from '../companies/model';
-import Skill from '../skills/model';
 import { generatePassword } from '../accounts/controller';
 
 // Config the .env file

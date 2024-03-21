@@ -103,9 +103,12 @@ applicantRoutes.post('/register', async (req, res) => {
     )
       .then((jwt) => {
         if (jwt !== '') {
-          res
-            .status(200)
-            .send({ auth: true, token: jwt, type: type, email: email });
+          res.status(200).send({
+            auth: true,
+            token: jwt,
+            type,
+            email,
+          });
         } else {
           res.status(500).send('Internal Server Error');
         }
@@ -137,7 +140,7 @@ applicantRoutes.post('/register', async (req, res) => {
  *         description: Internal server error.
  */
 applicantRoutes.get('/', requireAuth, async (req, res) => {
-  const email = res.locals.email;
+  const { email } = res.locals;
   await Applicant.getApplicantByEmail(email as string)
     .then((data) => {
       res.status(200).send(data);
@@ -339,7 +342,7 @@ applicantRoutes.post(
  *         description: Server error.
  */
 applicantRoutes.post('/updateSkills', requireAuth, async (req, res) => {
-  const email = res.locals.email;
+  const { email } = res.locals;
   const { skills } = req.body;
   await Applicant.updateApplicantSkills(email, skills)
     .then(() => {
@@ -361,7 +364,7 @@ applicantRoutes.use(
     req: express.Request,
     res: express.Response,
     next: express.NextFunction,
-  ) => {
+  ): void => {
     if (err instanceof multer.MulterError) {
       // Handle Multer errors
       res.status(400).send(`Multer error: ${err.message}`);

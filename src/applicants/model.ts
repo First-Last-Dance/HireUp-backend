@@ -32,15 +32,16 @@ export interface IApplicant extends mongoose.Document {
 
 // Define the schema for the applicant collection
 const applicantSchema = new Schema({
-  email: { type: String, required: true, unique: true }, // Email field is required and unique
-  firstName: { type: String, required: true }, // First name field is required
-  middleName: { type: String, required: true }, // Middle name field is required
-  lastName: { type: String, required: true }, // Last name field is required
-  phoneNumber: { type: String, required: true, unique: true }, // Phone number field is required and unique
-  nationalIDNumber: { type: String, required: true, unique: true }, // National ID number field is required and unique
-  profilePhoto: { type: String, default: '' }, // Default profile photo is an empty string
-  nationalIDPhotoFace: { type: String, default: '' }, // Default national ID photo (face) is an empty string
-  nationalIDPhotoBack: { type: String, default: '' }, // Default national ID photo (back) is an empty string
+  email: { type: String, required: true, unique: true }, // Required and unique email
+  firstName: { type: String, required: true }, // Required first name
+  middleName: { type: String, required: true }, // Required middle name
+  lastName: { type: String, required: true }, // Required last name
+  phoneNumber: { type: String, required: true, unique: true }, // Required and unique phone number
+  // Required and unique national ID number
+  nationalIDNumber: { type: String, required: true, unique: true },
+  profilePhoto: { type: String, default: '' }, // Default profile photo: empty string
+  nationalIDPhotoFace: { type: String, default: '' }, // Default national ID photo (face): empty string
+  nationalIDPhotoBack: { type: String, default: '' }, // Default national ID photo (back): empty string
   skills: [{ type: mongoose.Types.ObjectId, ref: 'Skill' }], // Reference to Skills model
 });
 

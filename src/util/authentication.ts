@@ -2,7 +2,11 @@ import { Request, Response } from 'express';
 import { NextFunction } from 'connect';
 import * as jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
-import { isAccountAdmin } from '../accounts/service';
+import {
+  isAccountAdmin,
+  isAccountApplicant,
+  isAccountCompany,
+} from '../accounts/service';
 
 interface JwtPayload {
   email: string;
@@ -37,20 +41,35 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   );
 }
 
-// export function requireManager(
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ) {
-//   isManager(res.locals.userName)
-//     .then((manager) => {
-//       if (manager) {
-//         return next();
-//       }
-//       return res.status(401).send('signed in user must be manager');
-//     })
-//     .catch((err) => res.status(500).send(err));
-// }
+export function requireCompany(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  isAccountCompany(res.locals.email)
+    .then((company) => {
+      if (company) {
+        return next();
+      }
+      return res.status(401).send('signed in user must be Company');
+    })
+    .catch((err) => res.status(500).send(err));
+}
+
+export function requireApplicant(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  isAccountApplicant(res.locals.email)
+    .then((applicant) => {
+      if (applicant) {
+        return next();
+      }
+      return res.status(401).send('signed in user must be Company');
+    })
+    .catch((err) => res.status(500).send(err));
+}
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {
   isAccountAdmin(res.locals.email)
     .then((admin) => {

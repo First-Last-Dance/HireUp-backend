@@ -38,10 +38,7 @@ export async function addAccount(
   password: string,
 ): Promise<IAccount> {
   if (!(await isEmailAvailable(email))) {
-    throw new CodedError(
-      ErrorMessage.EmailAlreadyExist,
-      ErrorCode.AlreadyExist,
-    );
+    throw new CodedError(ErrorMessage.EmailAlreadyExist, ErrorCode.Conflict);
   }
   const newAccount = new AccountModel({ email, password });
   return newAccount.save();
@@ -116,10 +113,7 @@ export async function getAccountByEmail(
 export async function getPasswordByEmail(email: string): Promise<string> {
   const account = await AccountModel.findOne({ email });
   if (!account) {
-    throw new CodedError(
-      ErrorMessage.AccountNotFound,
-      ErrorCode.AccountNotFound,
-    );
+    throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
   }
   return account.password;
 }
@@ -142,4 +136,14 @@ export async function isAccountVerified(email: string): Promise<boolean> {
 export async function isAccountAdmin(email: string): Promise<boolean> {
   const account = await AccountModel.findOne({ email });
   return !!account && account.admin;
+}
+
+export async function isAccountCompany(email: string): Promise<boolean> {
+  const account = await AccountModel.findOne({ email });
+  return !!account && account.type === 'Company';
+}
+
+export async function isAccountApplicant(email: string): Promise<boolean> {
+  const account = await AccountModel.findOne({ email });
+  return !!account && account.type === 'Applicant';
 }

@@ -33,10 +33,7 @@ export async function getApplicantByEmail(email: string): Promise<IApplicant> {
       throw err;
     });
   if (!applicant) {
-    throw new CodedError(
-      ErrorMessage.AccountNotFound,
-      ErrorCode.AccountNotFound,
-    );
+    throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
   }
   return applicant;
 }
@@ -102,13 +99,13 @@ export async function addApplicant(
   if (!(await isPhoneNumberAvailable(phoneNumber))) {
     throw new CodedError(
       ErrorMessage.PhoneNumberAlreadyExist,
-      ErrorCode.AlreadyExist,
+      ErrorCode.Conflict,
     );
   }
   if (!(await isNationalIDNumberAvailable(nationalIDNumber))) {
     throw new CodedError(
       ErrorMessage.NationalIDAlreadyExist,
-      ErrorCode.AlreadyExist,
+      ErrorCode.Conflict,
     );
   }
   const newAccount = new ApplicantModel({
@@ -133,14 +130,11 @@ export async function updateProfilePicture(
   picture: string,
 ): Promise<void> {
   if (await isEmailAvailable(email)) {
-    throw new CodedError(
-      ErrorMessage.AccountNotFound,
-      ErrorCode.AccountNotFound,
-    );
+    throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
   }
   await ApplicantModel.findOneAndUpdate(
     { email },
-    { profilePhoto: picture, skills: ['65f17a8d859c05811a50453c'] },
+    { profilePhoto: picture },
   ).catch((err) => {
     throw err;
   });
@@ -157,10 +151,7 @@ export async function updateNationalIDPhotoFace(
   picture: string,
 ): Promise<void> {
   if (await isEmailAvailable(email)) {
-    throw new CodedError(
-      ErrorMessage.AccountNotFound,
-      ErrorCode.AccountNotFound,
-    );
+    throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
   }
   await ApplicantModel.findOneAndUpdate(
     { email },
@@ -181,10 +172,7 @@ export async function updateNationalIDPhotoBack(
   picture: string,
 ): Promise<void> {
   if (await isEmailAvailable(email)) {
-    throw new CodedError(
-      ErrorMessage.AccountNotFound,
-      ErrorCode.AccountNotFound,
-    );
+    throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
   }
   await ApplicantModel.findOneAndUpdate(
     { email },

@@ -4,6 +4,7 @@ import { CompanyData } from './model';
 
 /**
  * Registers a new company.
+ *
  * @param email The email of the company.
  * @param password The password of the company.
  * @param type The type of the company.
@@ -45,6 +46,7 @@ export async function register(
 
 /**
  * Retrieves company data by email.
+ *
  * @param email The email of the company.
  * @returns The data of the company.
  */
@@ -66,6 +68,7 @@ export async function getCompanyByEmail(email: string): Promise<CompanyData> {
 
 /**
  * Updates the logo of a company.
+ *
  * @param email The email of the company.
  * @param picture The base64 encoded string of the logo.
  */
@@ -73,4 +76,17 @@ export async function updateLogo(email: string, picture: string) {
   await Company.updateLogo(email, picture).catch((err) => {
     throw err;
   });
+}
+
+/**
+ * Retrieves the company ID by email.
+ *
+ * @param email The email of the company.
+ * @returns The ID of the company.
+ */
+export async function getCompanyIDByEmail(email: string): Promise<string> {
+  const res = await Company.getCompanyByEmail(email).catch((err) => {
+    throw err;
+  });
+  return res._id;
 }

@@ -63,7 +63,9 @@ const upload = multer({
  */
 
 companyRoutes.post('/register', async (req, res) => {
-  const { email, password, name, description, address } = req.body;
+  const {
+    email, password, name, description, address,
+  } = req.body;
   const type = 'Company';
   if (!email) {
     res.status(400).send('Email is required');
@@ -81,7 +83,9 @@ companyRoutes.post('/register', async (req, res) => {
         if (jwt !== '') {
           res
             .status(200)
-            .send({ auth: true, token: jwt, type: type, email: email });
+            .send({
+              auth: true, token: jwt, type, email,
+            });
         } else {
           res.status(500).send('Internal Server Error');
         }
@@ -114,7 +118,7 @@ companyRoutes.post('/register', async (req, res) => {
  */
 
 companyRoutes.get('/', requireAuth, async (req, res) => {
-  const email = res.locals.email;
+  const { email } = res.locals;
   await Company.getCompanyByEmail(email as string)
     .then((data) => {
       res.status(200).send(data);

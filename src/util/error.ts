@@ -9,6 +9,7 @@ export class CodedError extends Error {
 // message enum
 export enum ErrorMessage {
   AccountNotFound = 'Account not found',
+  JobNotFound = 'Job not found',
   UserAlreadyExist = 'User already exist',
   EmailAlreadyExist = 'Email already exist',
   PhoneNumberAlreadyExist = 'phone number already exist',
@@ -35,20 +36,16 @@ export enum ErrorMessage {
   secondLinesmanBusy = 'Second Linesman is busy that day',
   CanNotCancel = 'can not cancel reservation',
   InternalServerError = 'internal server error',
+  Forbidden = 'Forbidden',
 }
 
 // code enums
 export enum ErrorCode {
-  AccountNotFound = 400,
+  NotFound = 404,
   InvalidParameter = 400,
   MissingParameter = 400,
   AuthenticationError = 401,
-  AlreadyExist = 400,
-  UserAlreadyAuthorized = 400,
-  UserNotAuthorized = 400,
-  StadiumNotFound = 400,
-  MatchNotFound = 400,
-  StadiumAlreadyExist = 400,
+  Forbidden = 403,
   Conflict = 409,
   InternalServerError = 500,
 }

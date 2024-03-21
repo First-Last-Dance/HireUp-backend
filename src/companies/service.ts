@@ -28,10 +28,7 @@ export async function getCompanyByEmail(email: string): Promise<ICompany> {
     throw err;
   });
   if (!company) {
-    throw new CodedError(
-      ErrorMessage.AccountNotFound,
-      ErrorCode.AccountNotFound,
-    );
+    throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
   }
   return company;
 }
@@ -85,10 +82,7 @@ export async function updateLogo(
   picture: string,
 ): Promise<void> {
   if (await isEmailAvailable(email)) {
-    throw new CodedError(
-      ErrorMessage.AccountNotFound,
-      ErrorCode.AccountNotFound,
-    );
+    throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
   }
   await CompanyModel.findOneAndUpdate({ email }, { logo: picture }).catch(
     (err) => {

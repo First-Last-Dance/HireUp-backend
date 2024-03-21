@@ -66,7 +66,7 @@ accountRoutes.post('/logIn', async (req, res) => {
           auth: true,
           token: result.jwt,
           type: result.type,
-          email: email,
+          email,
         });
       })
       .catch((err) => {
