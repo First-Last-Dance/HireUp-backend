@@ -82,7 +82,7 @@ jobRoutes.post('/addJob', requireAuth, requireCompany, async (req, res) => {
     res.status(400).send('Quiz deadline is required');
   } else if (!interviewDeadline) {
     res.status(400).send('Interview deadline is required');
-  } else if (!quizRequired) {
+  } else if (quizRequired == undefined) {
     res.status(400).send('Quiz required is required');
   }
   await Job.addJob(
