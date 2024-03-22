@@ -7,6 +7,7 @@ export async function getAllJobs(): Promise<IJob[]> {
 }
 
 export async function addJob(jobData: JobData): Promise<IJob> {
+  console.log(jobData);
   const newJob = new JobModel(jobData);
   return newJob.save().catch((error) => {
     throw error;
@@ -49,7 +50,7 @@ export async function getAllAvailableJobs(
       select: 'name -_id',
     })
     .populate({
-      path: 'company',
+      path: 'companyID',
       select: 'name',
     })
     .limit(limit)
@@ -70,7 +71,7 @@ export async function getCompanyJobs(
       select: 'name -_id',
     })
     .populate({
-      path: 'company',
+      path: 'companyID',
       select: 'name',
     })
     .limit(limit)
@@ -95,7 +96,7 @@ export async function getAvailableJobsBySkills(
       select: 'name -_id',
     })
     .populate({
-      path: 'company',
+      path: 'companyID',
       select: 'name',
     })
     .limit(limit)

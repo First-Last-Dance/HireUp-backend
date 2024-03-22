@@ -18,7 +18,7 @@ export interface IJob extends Document {
   description: string;
   requiredSkills: { type: mongoose.Types.ObjectId; ref: 'Skill' }[]; // Reference to Skills model
   salary: string;
-  company: { type: mongoose.Types.ObjectId; ref: 'Company' }; // Reference to Companies model;
+  companyID: { type: mongoose.Types.ObjectId; ref: 'Company' }; // Reference to Companies model;
   applicationDeadline: Date;
   quizDeadline: Date;
   interviewDeadline: Date;
@@ -34,7 +34,7 @@ const jobSchema: Schema = new Schema({
     required: true,
   },
   salary: { type: String, required: true },
-  company: { type: mongoose.Types.ObjectId, ref: 'Company', required: true },
+  companyID: { type: mongoose.Types.ObjectId, ref: 'Company', required: true },
   applicationDeadline: { type: Date, required: true },
   quizDeadline: { type: Date, required: true },
   interviewDeadline: { type: Date, required: true },

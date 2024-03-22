@@ -49,8 +49,8 @@ export async function getAllAvailableJobs(
       description: job.description,
       requiredSkills: skillsArr,
       salary: job.salary,
-      companyID: (job.company as unknown as ICompany)._id,
-      companyName: (job.company as unknown as ICompany).name,
+      companyID: (job.companyID as unknown as ICompany)._id,
+      companyName: (job.companyID as unknown as ICompany).name,
       applicationDeadline: job.applicationDeadline,
       quizDeadline: job.quizDeadline,
       interviewDeadline: job.interviewDeadline,
@@ -69,7 +69,7 @@ export async function deleteJobByID(
     throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
   }
   const companyID = await getCompanyIDByEmail(companyEmail);
-  if ((job.company as unknown as ICompany)._id !== companyID) {
+  if ((job.companyID as unknown as ICompany)._id !== companyID) {
     throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
   }
   await Job.deleteJobByID(jobID);
@@ -89,8 +89,8 @@ export async function getJobByID(jobID: string): Promise<JobData | null> {
     description: job.description,
     requiredSkills: skillsArr,
     salary: job.salary,
-    companyID: (job.company as unknown as ICompany)._id,
-    companyName: (job.company as unknown as ICompany).name,
+    companyID: (job.companyID as unknown as ICompany)._id,
+    companyName: (job.companyID as unknown as ICompany).name,
     applicationDeadline: job.applicationDeadline,
     quizDeadline: job.quizDeadline,
     interviewDeadline: job.interviewDeadline,
@@ -116,8 +116,8 @@ export async function getAvailableJobsBySkills(
       description: job.description,
       requiredSkills: skillsArr,
       salary: job.salary,
-      companyID: (job.company as unknown as ICompany)._id,
-      companyName: (job.company as unknown as ICompany).name,
+      companyID: (job.companyID as unknown as ICompany)._id,
+      companyName: (job.companyID as unknown as ICompany).name,
       applicationDeadline: job.applicationDeadline,
       quizDeadline: job.quizDeadline,
       interviewDeadline: job.interviewDeadline,

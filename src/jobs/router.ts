@@ -68,17 +68,22 @@ jobRoutes.post('/addJob', requireAuth, requireCompany, async (req, res) => {
     interviewDeadline,
     quizRequired,
   } = req.body;
-  if (
-    !title ||
-    !description ||
-    !requiredSkills ||
-    !salary ||
-    !applicationDeadline ||
-    !quizDeadline ||
-    !interviewDeadline ||
-    !quizRequired
-  ) {
-    res.status(400).send('Missing parameters');
+  if (!title) {
+    res.status(400).send('Title is required');
+  } else if (!description) {
+    res.status(400).send('Description is required');
+  } else if (!requiredSkills) {
+    res.status(400).send('Required skills are required');
+  } else if (!salary) {
+    res.status(400).send('Salary is required');
+  } else if (!applicationDeadline) {
+    res.status(400).send('Application deadline is required');
+  } else if (!quizDeadline) {
+    res.status(400).send('Quiz deadline is required');
+  } else if (!interviewDeadline) {
+    res.status(400).send('Interview deadline is required');
+  } else if (!quizRequired) {
+    res.status(400).send('Quiz required is required');
   }
   await Job.addJob(
     title,
@@ -132,8 +137,10 @@ jobRoutes.post('/addJob', requireAuth, requireCompany, async (req, res) => {
  */
 jobRoutes.get('/availableJobs', async (req, res) => {
   const { limit, page } = req.query;
-  if (!limit || !page) {
-    res.status(400).send('Missing parameters');
+  if (!limit) {
+    res.status(400).send('Limit is required');
+  } else if (!page) {
+    res.status(400).send('Page is required');
   }
   const startIndex = (parseInt(page as string) - 1) * parseInt(limit as string);
   const endIndex = parseInt(page as string) * parseInt(limit as string);
@@ -204,7 +211,7 @@ jobRoutes.delete('/', requireAuth, requireCompany, async (req, res) => {
   const companyEmail = res.locals.email;
   const { jobID } = req.query;
   if (!jobID) {
-    res.status(400).send('Missing parameters');
+    res.status(400).send('Job ID is required');
   }
   await Job.deleteJobByID(jobID as string, companyEmail)
     .then(() => {
@@ -244,7 +251,7 @@ jobRoutes.delete('/', requireAuth, requireCompany, async (req, res) => {
 jobRoutes.get('/', async (req, res) => {
   const { jobID } = req.query;
   if (!jobID) {
-    res.status(400).send('Missing parameters');
+    res.status(400).send('Job ID is required');
   }
   await Job.getJobByID(jobID as string)
     .then((job) => {
