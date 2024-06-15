@@ -16,7 +16,7 @@ export async function addJob(
   quizDeadline: Date,
   interviewDeadline: Date,
   quizRequired: boolean,
-): Promise<void> {
+): Promise<string> {
   const skillsIDs = await getSkillsIDs(requiredSkills);
   const companyID = await getCompanyIDByEmail(companyEmail);
   const jobData: JobData = {
@@ -30,7 +30,10 @@ export async function addJob(
     interviewDeadline,
     quizRequired,
   };
-  await Job.addJob(jobData);
+  const job = await Job.addJob(jobData).catch((err) => {
+    throw err;
+  });
+  return job._id;
 }
 
 export async function getAllAvailableJobs(
@@ -46,6 +49,7 @@ export async function getAllAvailableJobs(
     });
     jobsArr.push({
       title: job.title,
+      id: job._id,
       description: job.description,
       requiredSkills: skillsArr,
       salary: job.salary,

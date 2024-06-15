@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface JobData {
   title?: string;
+  id?: string;
   description?: string;
   requiredSkills?: string[]; // Reference to Skills model
   salary?: string;

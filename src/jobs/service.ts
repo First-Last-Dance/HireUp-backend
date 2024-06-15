@@ -126,3 +126,11 @@ export async function getNumberOfAvailableJobsBySkills(
     throw error;
   });
 }
+
+// Check if the job exists
+export async function checkJobExists(jobID: string): Promise<boolean> {
+  const job = await JobModel.findById(jobID).catch((error) => {
+    throw error;
+  });
+  return job !== null;
+}
