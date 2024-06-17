@@ -9,6 +9,8 @@ export class CodedError extends Error {
 // message enum
 export enum ErrorMessage {
   AccountNotFound = 'Account not found',
+  ApplicationAlreadyExists = 'Application already exists',
+  ApplicationNotFound = 'Application not found',
   JobIsNotOwnedByThisCompany = 'Job is not owned by this company',
   JobDoesNotRequireAQuiz = 'Job does not require a quiz',
   NoQuestions = 'No questions',

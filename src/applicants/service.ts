@@ -192,3 +192,13 @@ export async function updateApplicantSkills(
     },
   );
 }
+
+export async function getApplicantIDByEmail(email: string): Promise<string> {
+  const applicant = await ApplicantModel.findOne({ email }).catch((err) => {
+    throw err;
+  });
+  if (!applicant) {
+    throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
+  }
+  return applicant._id;
+}

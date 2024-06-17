@@ -5,6 +5,7 @@ import companyRoutes from './companies/router';
 import skillRoutes from './skills/router';
 import jobRoutes from './jobs/router';
 import quizRoutes from './quizzes/router';
+import applicationRoutes from './applications/router';
 
 const routes = express.Router();
 
@@ -17,5 +18,6 @@ routes.use('/company', companyRoutes);
 routes.use('/skill', skillRoutes);
 routes.use('/job', jobRoutes);
 routes.use('/quiz', quizRoutes);
+routes.use('/application', applicationRoutes);
 
 export default routes;
