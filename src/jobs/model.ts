@@ -40,7 +40,7 @@ const jobSchema: Schema = new Schema({
   quizDeadline: { type: Date, required: true },
   interviewDeadline: { type: Date, required: true },
   quizRequired: { type: Boolean, required: true },
-  published: { type: Boolean, default: false },
+  published: { type: Boolean, default: true },
 });
 
 const Job = mongoose.model<IJob>('Job', jobSchema);
