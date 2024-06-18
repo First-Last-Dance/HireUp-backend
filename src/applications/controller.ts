@@ -47,10 +47,32 @@ export async function addApplication(
       ErrorCode.Conflict,
     );
   }
+  // Check if quiz is required
+  const job = await Job.getJobByID(jobID);
+  if (!job) {
+    throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
+  }
+  let steps = [
+    'Application Form',
+    'Online Quiz',
+    'Online Interview',
+    'Final Result',
+  ];
+  if (job.quizRequired) {
+    steps = [
+      'Application Form',
+      'Online Quiz',
+      'Online Interview',
+      'Final Result',
+    ];
+  } else {
+    steps = ['Application Form', 'Online Interview', 'Final Result'];
+  }
   const data: ApplicationData = {
-    status: 'Pending',
+    status: 'Application Form',
     applicantID: applicantID,
     jobID,
+    steps,
   };
   const application = await Application.addApplication(data).catch((err) => {
     throw err;
@@ -60,6 +82,7 @@ export async function addApplication(
     status: application.status,
     applicantID: application.applicantID as unknown as string,
     jobID: application.jobID as unknown as string,
+    steps: application.steps,
   };
   return newApplication;
 }
@@ -76,11 +99,23 @@ export async function getApplicationById(
     throw new CodedError(ErrorMessage.ApplicationNotFound, ErrorCode.NotFound);
   }
 
+  const job = await Job.getJobByID(application.jobID as unknown as string);
+
+  if (!job) {
+    throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
+  }
+
+  const companyName = (job.companyID as unknown as ICompany).name;
+  const title = job.title;
+
   const retrievedApplication: ApplicationData = {
     applicationID: application._id,
     status: application.status,
     applicantID: application.applicantID as unknown as string,
     jobID: application.jobID as unknown as string,
+    companyName: companyName,
+    title: title,
+    steps: application.steps,
   };
   return retrievedApplication;
 }
@@ -102,14 +137,23 @@ export async function getApplicationsByApplicantEmail(
     throw err;
   });
   const applicationsArr: ApplicationData[] = [];
-  applications.forEach((application) => {
+  for (const application of applications) {
+    const job = await Job.getJobByID(application.jobID as unknown as string);
+    if (!job) {
+      throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
+    }
+    const companyName = (job.companyID as unknown as ICompany).name;
+    const title = job.title;
     applicationsArr.push({
       applicationID: application._id,
       status: application.status,
       applicantID: application.applicantID as unknown as string,
       jobID: application.jobID as unknown as string,
+      companyName: companyName,
+      title: title,
+      steps: application.steps,
     });
-  });
+  }
   return applicationsArr;
 }
 
@@ -131,6 +175,8 @@ export async function getApplicationsByJobId(
       ErrorCode.Forbidden,
     );
   }
+  const companyName = (job.companyID as unknown as ICompany).name;
+  const title = job.title;
   const applications = await Application.getApplicationsByJobId(
     jobId,
     limit,
@@ -145,6 +191,9 @@ export async function getApplicationsByJobId(
       status: application.status,
       applicantID: application.applicantID as unknown as string,
       jobID: application.jobID as unknown as string,
+      companyName: companyName,
+      title: title,
+      steps: application.steps,
     });
   });
   return applicationsArr;

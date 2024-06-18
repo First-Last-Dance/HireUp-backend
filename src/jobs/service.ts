@@ -20,12 +20,6 @@ export async function deleteJobByID(jobID: string): Promise<void> {
   });
 }
 
-export async function getJobByID(jobID: string): Promise<IJob | null> {
-  return JobModel.findById(jobID).catch((error) => {
-    throw error;
-  });
-}
-
 export async function updateJobByID(
   jobID: string,
   jobData: JobData,
@@ -139,4 +133,13 @@ export async function checkJobExists(jobID: string): Promise<boolean> {
     throw error;
   });
   return job !== null;
+}
+
+export async function getJobByID(jobID: string): Promise<IJob | null> {
+  return JobModel.findById(jobID)
+    .populate({ path: 'companyID', select: 'name' })
+    .populate({ path: 'requiredSkills', select: 'name' })
+    .catch((error) => {
+      throw error;
+    });
 }
