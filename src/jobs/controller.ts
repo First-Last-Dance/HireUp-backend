@@ -141,3 +141,40 @@ export async function getNumberOfAvailableJobsBySkills(
   const skillsIDs = await getSkillsIDs(skills);
   return Job.getNumberOfAvailableJobsBySkills(skillsIDs);
 }
+
+export async function getJobsByCompany(
+  companyEmail: string,
+  limit: number,
+  page: number,
+): Promise<JobData[]> {
+  const companyID = await getCompanyIDByEmail(companyEmail);
+  const jobs = await Job.getCompanyJobs(companyID, limit, page);
+  const jobsArr: JobData[] = [];
+  const skillsArr: string[] = [];
+  jobs.forEach((job) => {
+    job.requiredSkills.forEach((skill) => {
+      skillsArr.push((skill as unknown as ISkill).name);
+    });
+    jobsArr.push({
+      title: job.title,
+      id: job._id,
+      description: job.description,
+      requiredSkills: skillsArr,
+      salary: job.salary,
+      companyID: (job.companyID as unknown as ICompany)._id,
+      companyName: (job.companyID as unknown as ICompany).name,
+      applicationDeadline: job.applicationDeadline,
+      quizDeadline: job.quizDeadline,
+      interviewDeadline: job.interviewDeadline,
+      quizRequired: job.quizRequired,
+    });
+  });
+  return jobsArr;
+}
+
+export async function getCompanyJobsCount(
+  companyEmail: string,
+): Promise<number> {
+  const companyID = await getCompanyIDByEmail(companyEmail);
+  return Job.getCompanyJobsCount(companyID);
+}

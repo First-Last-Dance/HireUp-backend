@@ -84,28 +84,29 @@ jobRoutes.post('/addJob', requireAuth, requireCompany, async (req, res) => {
     res.status(400).send('Interview deadline is required');
   } else if (quizRequired === undefined) {
     res.status(400).send('Quiz required is required');
+  } else {
+    await Job.addJob(
+      title,
+      description,
+      requiredSkills,
+      salary,
+      companyEmail,
+      applicationDeadline,
+      quizDeadline,
+      interviewDeadline,
+      quizRequired,
+    )
+      .then((id) => {
+        res.status(200).send({ id: id });
+      })
+      .catch((err) => {
+        if (err instanceof CodedError) {
+          res.status(err.code).send(err.message);
+        } else {
+          res.status(500).send(err);
+        }
+      });
   }
-  await Job.addJob(
-    title,
-    description,
-    requiredSkills,
-    salary,
-    companyEmail,
-    applicationDeadline,
-    quizDeadline,
-    interviewDeadline,
-    quizRequired,
-  )
-    .then((id) => {
-      res.status(200).send({id: id});
-    })
-    .catch((err) => {
-      if (err instanceof CodedError) {
-        res.status(err.code).send(err.message);
-      } else {
-        res.status(500).send(err);
-      }
-    });
 });
 
 /**
@@ -141,44 +142,50 @@ jobRoutes.get('/availableJobs', async (req, res) => {
     res.status(400).send('Limit is required');
   } else if (!page) {
     res.status(400).send('Page is required');
+  } else {
+    const startIndex =
+      (parseInt(page as string) - 1) * parseInt(limit as string);
+    const endIndex = parseInt(page as string) * parseInt(limit as string);
+    const numberOfAvailableJobs = await Job.getNumberOfAvailableJobs();
+    const pagesCount = Math.ceil(
+      numberOfAvailableJobs / parseInt(limit as string),
+    );
+    await Job.getAllAvailableJobs(
+      parseInt(limit as string),
+      parseInt(page as string),
+    )
+      .then(async (jobs) => {
+        const results: {
+          previous?: { page: number; limit: number };
+          next?: { page: number; limit: number };
+          jobs: JobData[];
+          pages: { count: number; limit: number };
+        } = {
+          jobs: jobs,
+          pages: { count: pagesCount, limit: parseInt(limit as string) },
+        };
+        if (endIndex < numberOfAvailableJobs) {
+          results.next = {
+            page: parseInt(page as string) + 1,
+            limit: parseInt(limit as string),
+          };
+        }
+        if (startIndex > 0) {
+          results.previous = {
+            page: parseInt(page as string) - 1,
+            limit: parseInt(limit as string),
+          };
+        }
+        res.status(200).send(results);
+      })
+      .catch((err) => {
+        if (err instanceof CodedError) {
+          res.status(err.code).send(err.message);
+        } else {
+          res.status(500).send(err);
+        }
+      });
   }
-  const startIndex = (parseInt(page as string) - 1) * parseInt(limit as string);
-  const endIndex = parseInt(page as string) * parseInt(limit as string);
-  const numberOfAvailableJobs = await Job.getNumberOfAvailableJobs();
-  const pagesCount = Math.ceil(
-    numberOfAvailableJobs / parseInt(limit as string),
-  );
-  await Job.getAllAvailableJobs(
-    parseInt(limit as string),
-    parseInt(page as string),
-  )
-    .then(async (jobs) => {
-      const results: {
-        previous?: { page: number; limit: number };
-        next?: { page: number; limit: number };
-        jobs: JobData[];
-        pages: { count: number; limit: number };
-      } = {
-        jobs: jobs,
-        pages: { count: pagesCount, limit: parseInt(limit as string) },
-      };
-      if (endIndex < numberOfAvailableJobs) {
-        results.next = {
-          page: parseInt(page as string) + 1,
-          limit: parseInt(limit as string),
-        };
-      }
-      if (startIndex > 0) {
-        results.previous = {
-          page: parseInt(page as string) - 1,
-          limit: parseInt(limit as string),
-        };
-      }
-      res.status(200).send(results);
-    })
-    .catch((err) => {
-      res.status(500).send(err);
-    });
 });
 
 /**
@@ -206,34 +213,119 @@ jobRoutes.get('/availableJobs', async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-
 jobRoutes.delete('/', requireAuth, requireCompany, async (req, res) => {
   const companyEmail = res.locals.email;
   const { jobID } = req.query;
   if (!jobID) {
     res.status(400).send('Job ID is required');
+  } else {
+    await Job.deleteJobByID(jobID as string, companyEmail)
+      .then(() => {
+        res.status(200).send('Job deleted successfully');
+      })
+      .catch((err) => {
+        if (err instanceof CodedError) {
+          res.status(err.code).send(err.message);
+        } else {
+          res.status(500).send(err);
+        }
+      });
   }
-  await Job.deleteJobByID(jobID as string, companyEmail)
-    .then(() => {
-      res.status(200).send('Job deleted successfully');
-    })
-    .catch((err) => {
-      if (err instanceof CodedError) {
-        res.status(err.code).send(err.message);
-      } else {
-        res.status(500).send(err);
-      }
-    });
 });
 
 /**
  * @swagger
  * /job:
  *   get:
+ *     summary: Get jobs by company.
+ *     tags: [Job]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Number of jobs per page
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Page number
+ *     responses:
+ *       '200':
+ *         description: Jobs retrieved successfully.
+ *       '400':
+ *         description: Bad request. Missing or invalid parameters.
+ *       '401':
+ *         description: Unauthorized. Invalid credentials.
+ *       '500':
+ *         description: Internal server error.
+ */
+jobRoutes.get('/', requireAuth, requireCompany, async (req, res) => {
+  const companyEmail = res.locals.email;
+  const { limit, page } = req.query;
+  if (!limit) {
+    res.status(400).send('Limit is required');
+  } else if (!page) {
+    res.status(400).send('Page is required');
+  } else {
+    const startIndex =
+      (parseInt(page as string) - 1) * parseInt(limit as string);
+    const endIndex = parseInt(page as string) * parseInt(limit as string);
+    const numberOfAvailableJobs = await Job.getCompanyJobsCount(companyEmail);
+    const pagesCount = Math.ceil(
+      numberOfAvailableJobs / parseInt(limit as string),
+    );
+    await Job.getJobsByCompany(
+      companyEmail,
+      parseInt(limit as string),
+      parseInt(page as string),
+    )
+      .then(async (jobs) => {
+        const results: {
+          previous?: { page: number; limit: number };
+          next?: { page: number; limit: number };
+          jobs: JobData[];
+          pages: { count: number; limit: number };
+        } = {
+          jobs: jobs,
+          pages: { count: pagesCount, limit: parseInt(limit as string) },
+        };
+        if (endIndex < numberOfAvailableJobs) {
+          results.next = {
+            page: parseInt(page as string) + 1,
+            limit: parseInt(limit as string),
+          };
+        }
+        if (startIndex > 0) {
+          results.previous = {
+            page: parseInt(page as string) - 1,
+            limit: parseInt(limit as string),
+          };
+        }
+        res.status(200).send(results);
+      })
+      .catch((err) => {
+        if (err instanceof CodedError) {
+          res.status(err.code).send(err.message);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+  }
+});
+
+/**
+ * @swagger
+ * /job/{jobID}:
+ *   get:
  *     summary: Get a job by ID.
  *     tags: [Job]
  *     parameters:
- *       - in: query
+ *       - in: path
  *         name: jobID
  *         schema:
  *           type: string
@@ -247,19 +339,23 @@ jobRoutes.delete('/', requireAuth, requireCompany, async (req, res) => {
  *       '500':
  *         description: Internal server error.
  */
-
-jobRoutes.get('/', async (req, res) => {
-  const { jobID } = req.query;
+jobRoutes.get('/:jobID', async (req, res) => {
+  const jobID = req.params.jobID;
   if (!jobID) {
     res.status(400).send('Job ID is required');
+  } else {
+    await Job.getJobByID(jobID as string)
+      .then((job) => {
+        res.status(200).send(job);
+      })
+      .catch((err) => {
+        if (err instanceof CodedError) {
+          res.status(err.code).send(err.message);
+        } else {
+          res.status(500).send(err);
+        }
+      });
   }
-  await Job.getJobByID(jobID as string)
-    .then((job) => {
-      res.status(200).send(job);
-    })
-    .catch((err) => {
-      res.status(500).send(err);
-    });
 });
 
 export default jobRoutes;

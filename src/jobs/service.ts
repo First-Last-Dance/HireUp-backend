@@ -65,7 +65,7 @@ export async function getCompanyJobs(
   limit: number,
   page: number,
 ): Promise<IJob[]> {
-  return JobModel.find({ company: companyID })
+  return JobModel.find({ companyID })
     .populate({
       path: 'requiredSkills',
       select: 'name -_id',
@@ -79,6 +79,12 @@ export async function getCompanyJobs(
     .catch((error) => {
       throw error;
     });
+}
+
+export async function getCompanyJobsCount(companyID: string): Promise<number> {
+  return JobModel.countDocuments({ companyID }).catch((error) => {
+    throw error;
+  });
 }
 
 export async function getAvailableJobsBySkills(

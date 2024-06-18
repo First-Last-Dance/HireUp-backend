@@ -126,7 +126,7 @@ quizRoutes.get('/:quizId', requireAuth, requireCompany, (req, res) => {
 
 /**
  * @swagger
- * /quiz/getByJobID/{jobId}:
+ * /quiz/getByJobID/{jobID}:
  *   get:
  *     summary: Get quizzes by job ID.
  *     tags: [Quiz]
@@ -134,7 +134,7 @@ quizRoutes.get('/:quizId', requireAuth, requireCompany, (req, res) => {
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: jobId
+ *         name: jobID
  *         schema:
  *           type: string
  *         required: true
@@ -150,15 +150,15 @@ quizRoutes.get('/:quizId', requireAuth, requireCompany, (req, res) => {
 
 // Route to get quizzes by job ID
 quizRoutes.get(
-  '/getByJobID/:jobId',
+  '/getByJobID/:jobID',
   requireAuth,
   requireCompany,
   (req, res) => {
-    const jobId = req.params.jobId;
+    const jobID = req.params.jobID;
     const companyEmail = res.locals.email;
 
     // Fetch the quizzes by job ID
-    Job.getQuizByJobID(jobId, companyEmail)
+    Job.getQuizByJobID(jobID, companyEmail)
       .then((quiz) => {
         if (!quiz) {
           return res.status(404).send('Quiz not found');
