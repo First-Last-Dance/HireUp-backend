@@ -85,8 +85,10 @@ export async function getApplicationById(
   return retrievedApplication;
 }
 
-export async function getApplicationsByApplicantId(
+export async function getApplicationsByApplicantEmail(
   applicantEmail: string,
+  limit: number,
+  page: number,
 ): Promise<ApplicationData[]> {
   const applicantId = await Applicant.getApplicantIDByEmail(applicantEmail);
   if (!applicantId) {
@@ -94,6 +96,8 @@ export async function getApplicationsByApplicantId(
   }
   const applications = await Application.getApplicationsByApplicantId(
     applicantId,
+    limit,
+    page,
   ).catch((err) => {
     throw err;
   });
@@ -112,6 +116,8 @@ export async function getApplicationsByApplicantId(
 export async function getApplicationsByJobId(
   jobId: string,
   companyEmail: string,
+  limit: number,
+  page: number,
 ): Promise<ApplicationData[]> {
   // Check if the job belongs to the company
   const companyID = await getCompanyIDByEmail(companyEmail);
@@ -125,11 +131,13 @@ export async function getApplicationsByJobId(
       ErrorCode.Forbidden,
     );
   }
-  const applications = await Application.getApplicationsByJobId(jobId).catch(
-    (err) => {
-      throw err;
-    },
-  );
+  const applications = await Application.getApplicationsByJobId(
+    jobId,
+    limit,
+    page,
+  ).catch((err) => {
+    throw err;
+  });
   const applicationsArr: ApplicationData[] = [];
   applications.forEach((application) => {
     applicationsArr.push({
@@ -140,4 +148,25 @@ export async function getApplicationsByJobId(
     });
   });
   return applicationsArr;
+}
+
+export async function getApplicationsCountByJobID(
+  jobID: string,
+): Promise<number> {
+  return Application.getApplicationsCountByJobID(jobID);
+}
+
+export async function getApplicationsCountByApplicantEmail(
+  applicantEmail: string,
+): Promise<number> {
+  const applicantID = await Applicant.getApplicantIDByEmail(applicantEmail);
+  return Application.getApplicationsCountByApplicantID(applicantID);
+}
+
+export async function checkApplicationExists(
+  applicantEmail: string,
+  jobID: string,
+): Promise<boolean> {
+  const applicantID = await Applicant.getApplicantIDByEmail(applicantEmail);
+  return Application.checkApplicationExists(applicantID, jobID);
 }

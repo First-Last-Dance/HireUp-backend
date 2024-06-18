@@ -67,9 +67,13 @@ export async function getApplicationById(
  */
 export async function getApplicationsByJobId(
   jobId: string,
+  limit: number,
+  page: number,
 ): Promise<IApplication[]> {
   try {
-    const applications = await ApplicationModel.find({ jobID: jobId });
+    const applications = await ApplicationModel.find({ jobID: jobId })
+      .limit(limit)
+      .skip(limit * (page - 1));
     return applications;
   } catch (error) {
     console.error('Error fetching applications by job ID:', error);
@@ -84,11 +88,15 @@ export async function getApplicationsByJobId(
  */
 export async function getApplicationsByApplicantId(
   applicantId: string,
+  limit: number,
+  page: number,
 ): Promise<IApplication[]> {
   try {
     const applications = await ApplicationModel.find({
       applicantID: applicantId,
-    });
+    })
+      .limit(limit)
+      .skip(limit * (page - 1));
     return applications;
   } catch (error) {
     console.error('Error fetching applications by applicant ID:', error);
@@ -113,4 +121,20 @@ export async function checkApplicationExists(
     throw error;
   });
   return application !== null;
+}
+
+export async function getApplicationsCountByJobID(
+  jobID: string,
+): Promise<number> {
+  return ApplicationModel.countDocuments({ jobID }).catch((error) => {
+    throw error;
+  });
+}
+
+export async function getApplicationsCountByApplicantID(
+  applicantID: string,
+): Promise<number> {
+  return ApplicationModel.countDocuments({ applicantID }).catch((error) => {
+    throw error;
+  });
 }
