@@ -72,6 +72,9 @@ export async function getApplicationsByJobId(
 ): Promise<IApplication[]> {
   try {
     const applications = await ApplicationModel.find({ jobID: jobId })
+      .sort({
+        createdAt: -1,
+      })
       .limit(limit)
       .skip(limit * (page - 1));
     return applications;
@@ -95,6 +98,9 @@ export async function getApplicationsByApplicantId(
     const applications = await ApplicationModel.find({
       applicantID: applicantId,
     })
+      .sort({
+        createdAt: -1,
+      })
       .limit(limit)
       .skip(limit * (page - 1));
     return applications;

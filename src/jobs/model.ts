@@ -25,6 +25,7 @@ export interface IJob extends Document {
   interviewDeadline: Date;
   quizRequired: boolean;
   published: boolean;
+  createdAt: Date;
 }
 
 const jobSchema: Schema = new Schema({
@@ -41,6 +42,7 @@ const jobSchema: Schema = new Schema({
   interviewDeadline: { type: Date, required: true },
   quizRequired: { type: Boolean, required: true },
   published: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now },
 });
 
 const Job = mongoose.model<IJob>('Job', jobSchema);

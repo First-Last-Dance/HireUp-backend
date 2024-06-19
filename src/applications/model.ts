@@ -20,6 +20,7 @@ export interface IApplication extends mongoose.Document {
   jobID: mongoose.Types.ObjectId;
   status: string;
   steps: string[];
+  createdAt: Date;
 }
 
 // Define the schema for the application collection
@@ -32,6 +33,7 @@ const applicationSchema = new Schema({
   jobID: { type: mongoose.Types.ObjectId, ref: 'Job', required: true },
   status: { type: String, required: true },
   steps: [{ type: String, required: true }],
+  createdAt: { type: Date, default: Date.now },
 });
 
 // Create a mongoose model based on the schema

@@ -39,6 +39,9 @@ export async function getAllAvailableJobs(
     published: true,
     applicationDeadline: { $gte: new Date() },
   })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .skip(limit * (page - 1))
     .populate({
       path: 'requiredSkills',
       select: 'name -_id',
@@ -47,8 +50,6 @@ export async function getAllAvailableJobs(
       path: 'companyID',
       select: 'name',
     })
-    .limit(limit)
-    .skip(limit * (page - 1))
     .catch((error) => {
       throw error;
     });
@@ -60,6 +61,9 @@ export async function getCompanyJobs(
   page: number,
 ): Promise<IJob[]> {
   return JobModel.find({ companyID })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .skip(limit * (page - 1))
     .populate({
       path: 'requiredSkills',
       select: 'name -_id',
@@ -68,8 +72,6 @@ export async function getCompanyJobs(
       path: 'companyID',
       select: 'name',
     })
-    .limit(limit)
-    .skip(limit * (page - 1))
     .catch((error) => {
       throw error;
     });
@@ -91,6 +93,9 @@ export async function getAvailableJobsBySkills(
     applicationDeadline: { $gte: new Date() },
     requiredSkills: { $all: skills },
   })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .skip(limit * (page - 1))
     .populate({
       path: 'requiredSkills',
       select: 'name -_id',
@@ -99,8 +104,6 @@ export async function getAvailableJobsBySkills(
       path: 'companyID',
       select: 'name',
     })
-    .limit(limit)
-    .skip(limit * (page - 1))
     .catch((error) => {
       throw error;
     });
