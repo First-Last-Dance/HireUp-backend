@@ -239,7 +239,7 @@ export async function startQuiz(
 
   // Check if it's the correct status to start the quiz
 
-  if (application.status === 'Online Quiz') {
+  if (application.status !== 'Online Quiz') {
     throw new CodedError(ErrorMessage.IncorrectStep, ErrorCode.Conflict);
   }
 
