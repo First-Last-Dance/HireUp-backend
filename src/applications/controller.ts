@@ -5,6 +5,8 @@ import * as Applicant from '../applicants/service';
 import { getCompanyIDByEmail } from '../companies/controller';
 import * as Job from '../jobs/service';
 import { ICompany } from '../companies/model';
+import * as Quiz from '../quizzes/service';
+import { QuizData } from '../quizzes/model';
 
 export async function updateApplicationStatus(
   applicationId: string,
@@ -90,7 +92,7 @@ export async function addApplication(
 export async function getApplicationById(
   applicationId: string,
 ): Promise<ApplicationData> {
-  const application = await Application.getApplicationById(applicationId).catch(
+  const application = await Application.getApplicationByID(applicationId).catch(
     (err) => {
       throw err;
     },
@@ -157,7 +159,7 @@ export async function getApplicationsByApplicantEmail(
   return applicationsArr;
 }
 
-export async function getApplicationsByJobId(
+export async function getApplicationsByJobID(
   jobId: string,
   companyEmail: string,
   limit: number,
@@ -177,7 +179,7 @@ export async function getApplicationsByJobId(
   }
   const companyName = (job.companyID as unknown as ICompany).name;
   const title = job.title;
-  const applications = await Application.getApplicationsByJobId(
+  const applications = await Application.getApplicationsByJobID(
     jobId,
     limit,
     page,
@@ -218,4 +220,190 @@ export async function checkApplicationExists(
 ): Promise<boolean> {
   const applicantID = await Applicant.getApplicantIDByEmail(applicantEmail);
   return Application.checkApplicationExists(applicantID, jobID);
+}
+
+export async function startQuiz(
+  applicantEmail: string,
+  applicationID: string,
+): Promise<QuizData> {
+  // Get the details of the application
+  const application = await Application.getApplicationByID(applicationID);
+
+  if (!application) {
+    throw new CodedError(ErrorMessage.ApplicationNotFound, ErrorCode.NotFound);
+  }
+
+  // Check if the applicant has already started the quiz
+  if (application?.quizDeadline) {
+    throw new CodedError(
+      ErrorMessage.ApplicantAlreadyTookTheQuiz,
+      ErrorCode.Conflict,
+    );
+  }
+
+  // Get the quiz details
+  const job = await Job.getJobByID(application.jobID as unknown as string);
+  if (!job) {
+    throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
+  }
+
+  // Check if the quiz is required
+  if (!job.quizRequired) {
+    throw new CodedError(ErrorMessage.QuizNotRequired, ErrorCode.Conflict);
+  }
+
+  // Check if the quiz is expired
+  if (job.applicationDeadline < new Date()) {
+    throw new CodedError(ErrorMessage.QuizExpired, ErrorCode.Conflict);
+  }
+
+  const quiz = await Quiz.getQuizByJobID(
+    application.jobID as unknown as string,
+  );
+
+  // Check if the quiz exists
+  if (!quiz) {
+    throw new CodedError(ErrorMessage.QuizNotFound, ErrorCode.NotFound);
+  }
+
+  const quizDuration = 1000 * 60 * quiz.quizDurationInMinutes;
+
+  const quizDeadline = new Date(new Date().getTime() + quizDuration);
+
+  const delayDuration = 1000 * 60 * 2; // 2 minutes
+
+  // Update the quiz deadline
+  await Application.updateQuizDeadline(
+    applicationID,
+    new Date(quizDeadline.getTime() + delayDuration),
+  ).catch((err) => {
+    throw err;
+  });
+
+  // Get the Applicant ID
+  const applicantID = await Applicant.getApplicantIDByEmail(applicantEmail);
+
+  // Check if the applicant is the owner of the application
+  if (application.applicantID.toString() !== applicantID.toString()) {
+    throw new CodedError(
+      ErrorMessage.ApplicantIsNotTheOwnerOfTheApplication,
+      ErrorCode.Forbidden,
+    );
+  }
+
+  if (!quiz.questions) {
+    throw new CodedError(ErrorMessage.NoQuestions, ErrorCode.NotFound);
+  }
+
+  // Remove the correct answers and the score from the quiz
+  quiz.questions.forEach((question) => {
+    delete question.correctAnswer;
+    delete question.score;
+  });
+
+  return {
+    questions: quiz.questions,
+    applicationID: applicationID,
+    quizDeadline: quizDeadline,
+    quizDurationInMinutes: quiz.quizDurationInMinutes,
+  };
+}
+
+export async function submitQuiz(
+  applicantEmail: string,
+  applicationID: string,
+  answers: string[],
+): Promise<boolean> {
+  // Get the details of the application
+  const application = await Application.getApplicationByID(applicationID);
+
+  if (!application) {
+    throw new CodedError(ErrorMessage.ApplicationNotFound, ErrorCode.NotFound);
+  }
+
+  // Get the quiz details
+  const job = await Job.getJobByID(application.jobID as unknown as string);
+
+  if (!job) {
+    throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
+  }
+
+  // Check if the quiz is required
+
+  if (!job.quizRequired) {
+    throw new CodedError(ErrorMessage.QuizNotRequired, ErrorCode.Conflict);
+  }
+
+  // Get the quiz details
+
+  const quiz = await Quiz.getQuizByJobID(
+    application.jobID as unknown as string,
+  );
+
+  // Check if the quiz exists
+
+  if (!quiz) {
+    throw new CodedError(ErrorMessage.QuizNotFound, ErrorCode.NotFound);
+  }
+
+  // Check if the quiz is expired
+
+  if (application.quizDeadline === undefined) {
+    throw new CodedError(ErrorMessage.QuizNotStarted, ErrorCode.Conflict);
+  }
+
+  if (new Date() > application.quizDeadline) {
+    throw new CodedError(ErrorMessage.QuizExpired, ErrorCode.Conflict);
+  }
+
+  // Compare the answers with the correct answers
+
+  let score = 0;
+
+  for (let i = 0; i < quiz.questions.length; i++) {
+    if (quiz.questions[i].correctAnswer === answers[i]) {
+      score += quiz.questions[i].score || 1;
+    }
+  }
+
+  // Get the Applicant ID
+
+  const applicantID = await Applicant.getApplicantIDByEmail(
+    applicantEmail,
+  ).catch((err) => {
+    throw err;
+  });
+
+  // Check if the applicant is the owner of the application
+  if (application.applicantID.toString() !== applicantID.toString()) {
+    throw new CodedError(
+      ErrorMessage.ApplicantIsNotTheOwnerOfTheApplication,
+      ErrorCode.Forbidden,
+    );
+  }
+
+  // Calculate the pass ratio
+
+  const passRatio = quiz.passRatio || 0.5;
+
+  // Check if the applicant passed the quiz
+
+  const totalScore = quiz.questions.reduce(
+    (acc, question) => acc + (question.score || 1),
+    0,
+  );
+
+  const result = score / totalScore;
+
+  const status = result >= passRatio ? 'Online Interview' : 'Failed';
+
+  // Update the application status
+
+  await Application.updateApplicationStatus(applicationID, status).catch(
+    (err) => {
+      throw err;
+    },
+  );
+
+  return result >= passRatio;
 }

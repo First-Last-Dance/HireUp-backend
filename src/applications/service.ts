@@ -1,6 +1,5 @@
 // application.service.ts
 
-import mongoose from 'mongoose';
 import ApplicationModel, { IApplication, ApplicationData } from './model';
 
 /**
@@ -48,7 +47,7 @@ export async function addApplication(
  * @param applicationId - The ID of the application to retrieve
  * @returns Application document
  */
-export async function getApplicationById(
+export async function getApplicationByID(
   applicationId: string,
 ): Promise<IApplication | null> {
   try {
@@ -65,7 +64,7 @@ export async function getApplicationById(
  * @param jobId - The ID of the job
  * @returns Array of application documents
  */
-export async function getApplicationsByJobId(
+export async function getApplicationsByJobID(
   jobId: string,
   limit: number,
   page: number,
@@ -141,6 +140,17 @@ export async function getApplicationsCountByApplicantID(
   applicantID: string,
 ): Promise<number> {
   return ApplicationModel.countDocuments({ applicantID }).catch((error) => {
+    throw error;
+  });
+}
+
+export async function updateQuizDeadline(
+  applicationID: string,
+  quizDeadline: Date,
+): Promise<void> {
+  await ApplicationModel.findByIdAndUpdate(applicationID, {
+    quizDeadline,
+  }).catch((error) => {
     throw error;
   });
 }

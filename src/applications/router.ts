@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { application } from 'express';
 import * as Application from './controller';
 import {
   requireApplicant,
@@ -300,7 +300,7 @@ applicationRoutes.get(
         numberOfApplications / parseInt(limit as string),
       );
 
-      await Application.getApplicationsByJobId(
+      await Application.getApplicationsByJobID(
         jobID as string,
         companyEmail,
         parseInt(limit as string),
@@ -441,5 +441,121 @@ applicationRoutes.get('/:applicationID', requireAuth, (req, res) => {
       }
     });
 });
+
+/**
+ * @swagger
+ * /application/{applicationID}/startQuiz:
+ *   get:
+ *     summary: Starts a quiz for a given application
+ *     description: This endpoint starts a quiz for the applicant associated with the given application ID.
+ *     tags: [Application]
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the application to start the quiz for
+ *     responses:
+ *       200:
+ *         description: Quiz started successfully. Returns the quiz details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 questions:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       text:
+ *                         type: string
+ *                         description: The text of the question.
+ *                       answers:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         description: An array of possible answers.
+ *                 applicationID:
+ *                   type: string
+ *                   description: The ID of the application the quiz is associated with.
+ *                 quizDeadline:
+ *                   type: string
+ *                   format: date-time
+ *                   description: The deadline by which the quiz must be completed.
+ *       400:
+ *         description: Bad request. Possible reason could be invalid application ID.
+ *       401:
+ *         description: Unauthorized. User is not logged in or does not have permission to start the quiz.
+ *       500:
+ *         description: Internal server error.
+ *     security:
+ *       - bearerAuth: []
+ */
+
+applicationRoutes.get(
+  '/:applicationID/startQuiz',
+  requireAuth,
+  requireApplicant,
+  async (req, res) => {
+    const applicationID = req.params.applicationID;
+    const applicantEmail = res.locals.email;
+    Application.startQuiz(applicantEmail, applicationID)
+      .then((quiz) => {
+        res.status(200).send(quiz);
+      })
+      .catch((err) => {
+        if (err instanceof CodedError) {
+          res.status(err.code).send(err.message);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+  },
+);
+
+applicationRoutes.get(
+  '/:applicationID/startQuiz',
+  requireAuth,
+  requireApplicant,
+  async (req, res) => {
+    const applicationID = req.params.applicationID;
+    const applicantEmail = res.locals.email;
+    Application.startQuiz(applicantEmail, applicationID)
+      .then((quiz) => {
+        res.status(200).send(quiz);
+      })
+      .catch((err) => {
+        if (err instanceof CodedError) {
+          res.status(err.code).send(err.message);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+  },
+);
+
+applicationRoutes.post(
+  '/:applicationID/submitQuiz',
+  requireAuth,
+  requireApplicant,
+  async (req, res) => {
+    const applicationID = req.params.applicationID;
+    const applicantEmail = res.locals.email;
+    const { answers } = req.body;
+    Application.submitQuiz(applicantEmail, applicationID, answers)
+      .then((result) => {
+        res.status(200).send(result);
+      })
+      .catch((err) => {
+        if (err instanceof CodedError) {
+          res.status(err.code).send(err.message);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+  },
+);
 
 export default applicationRoutes;

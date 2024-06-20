@@ -21,6 +21,8 @@ export interface IApplication extends mongoose.Document {
   status: string;
   steps: string[];
   createdAt: Date;
+  quizDeadline?: Date;
+  interviewDeadline?: Date;
 }
 
 // Define the schema for the application collection
@@ -34,6 +36,8 @@ const applicationSchema = new Schema({
   status: { type: String, required: true },
   steps: [{ type: String, required: true }],
   createdAt: { type: Date, default: Date.now },
+  quizDeadline: { type: Date },
+  interviewDeadline: { type: Date },
 });
 
 // Create a mongoose model based on the schema

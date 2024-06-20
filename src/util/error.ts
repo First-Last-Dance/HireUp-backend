@@ -8,6 +8,12 @@ export class CodedError extends Error {
 }
 // message enum
 export enum ErrorMessage {
+  QuizNotStarted = 'Quiz not started',
+  QuizNotRequired = 'Quiz not required',
+  QuizExpired = 'Quiz expired',
+  ApplicantIsNotTheOwnerOfTheApplication = 'Applicant is not the owner of the application',
+  QuizNotFound = 'Quiz not found',
+  ApplicantAlreadyTookTheQuiz = 'Applicant already took the quiz',
   AccountNotFound = 'Account not found',
   ApplicationAlreadyExists = 'Application already exists',
   ApplicationNotFound = 'Application not found',

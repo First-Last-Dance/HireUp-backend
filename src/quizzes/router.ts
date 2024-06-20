@@ -58,7 +58,7 @@ const quizRoutes = express.Router();
 // Route to add a new quiz
 quizRoutes.post('/addQuiz', requireAuth, requireCompany, (req, res) => {
   const companyEmail = res.locals.email;
-  const { jobID, questions } = req.body;
+  const { jobID, questions, passRatio, quizDurationInMinutes } = req.body;
 
   // Validate jobID and questions in request body
   if (!jobID) {
@@ -68,8 +68,15 @@ quizRoutes.post('/addQuiz', requireAuth, requireCompany, (req, res) => {
     return res.status(400).send('questions are required');
   }
 
+  if (!passRatio) {
+    return res.status(400).send('passRatio is required');
+  }
+
+  if (!quizDurationInMinutes) {
+    return res.status(400).send('quizDurationInMinutes is required');
+  }
   // Add the quiz
-  Job.addQuiz(jobID, questions, companyEmail)
+  Job.addQuiz(jobID, questions, passRatio, quizDurationInMinutes, companyEmail)
     .then((quizID) => res.status(200).send(quizID))
     .catch((err) => {
       if (err instanceof CodedError) {

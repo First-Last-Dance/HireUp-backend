@@ -9,6 +9,8 @@ import mongoose from 'mongoose';
 export async function addQuiz(
   jobID: string,
   questions: QuestionData[],
+  passRatio: number,
+  quizDurationInMinutes: number,
   companyEmail: string,
 ): Promise<string> {
   // Get the job by its ID
@@ -58,6 +60,8 @@ export async function addQuiz(
   const quizData: QuizData = {
     jobID,
     questions,
+    passRatio,
+    quizDurationInMinutes,
   };
   const quiz = await Quiz.addQuiz(quizData).catch((err) => {
     throw err;
@@ -101,6 +105,8 @@ export async function getQuizById(
   return {
     jobID: quiz.jobID as unknown as string,
     questions: quiz.questions,
+    passRatio: quiz.passRatio,
+    quizDurationInMinutes: quiz.quizDurationInMinutes,
   };
 }
 
@@ -142,5 +148,7 @@ export async function getQuizByJobID(
   return {
     jobID: quiz.jobID as unknown as string,
     questions: quiz.questions,
+    passRatio: quiz.passRatio,
+    quizDurationInMinutes: quiz.quizDurationInMinutes,
   };
 }
