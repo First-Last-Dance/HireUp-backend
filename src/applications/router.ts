@@ -274,7 +274,7 @@ applicationRoutes.get('/', requireAuth, requireApplicant, async (req, res) => {
  *         description: Internal server error
  */
 applicationRoutes.get(
-  '/getApplicationsByJobId',
+  '/getApplicationsByJobId/:jobID',
   requireAuth,
   requireCompany,
   async (req, res) => {
@@ -484,6 +484,9 @@ applicationRoutes.get('/:applicationID', requireAuth, (req, res) => {
  *                   type: string
  *                   format: date-time
  *                   description: The deadline by which the quiz must be completed.
+ *                 quizDurationInMinutes:
+ *                   type: integer
+ *                   description: The duration of the quiz in minutes.
  *       400:
  *         description: Bad request. Possible reason could be invalid application ID.
  *       401:
@@ -515,26 +518,55 @@ applicationRoutes.get(
   },
 );
 
-applicationRoutes.get(
-  '/:applicationID/startQuiz',
-  requireAuth,
-  requireApplicant,
-  async (req, res) => {
-    const applicationID = req.params.applicationID;
-    const applicantEmail = res.locals.email;
-    Application.startQuiz(applicantEmail, applicationID)
-      .then((quiz) => {
-        res.status(200).send(quiz);
-      })
-      .catch((err) => {
-        if (err instanceof CodedError) {
-          res.status(err.code).send(err.message);
-        } else {
-          res.status(500).send(err);
-        }
-      });
-  },
-);
+/**
+ * @swagger
+ * /application/{applicationID}/submitQuiz:
+ *   post:
+ *     summary: Submit quiz answers for a given application
+ *     description: This endpoint allows an applicant to submit quiz answers for the specified application ID.
+ *     tags: [Application]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the application for which the quiz answers are being submitted
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               applicationID:
+ *                 type: string
+ *                 description: The ID of the application
+ *               answers:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: The answers provided by the applicant
+ *     responses:
+ *       200:
+ *         description: Quiz answers submitted successfully. Indicates if the applicant passed or failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 result:
+ *                   type: string
+ *                   description: Result of the quiz, either 'Passed' or 'Failed'
+ *       400:
+ *         description: Bad request. Possible reasons could be invalid application ID or missing answers.
+ *       401:
+ *         description: Unauthorized. User is not logged in or does not have permission to submit the quiz.
+ *       500:
+ *         description: Internal server error.
+ */
 
 applicationRoutes.post(
   '/:applicationID/submitQuiz',
@@ -546,7 +578,7 @@ applicationRoutes.post(
     const { answers } = req.body;
     Application.submitQuiz(applicantEmail, applicationID, answers)
       .then((result) => {
-        res.status(200).send(result);
+        res.status(200).send({ result: result ? 'Passed' : 'Failed' });
       })
       .catch((err) => {
         if (err instanceof CodedError) {

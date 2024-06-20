@@ -54,12 +54,8 @@ export async function addApplication(
   if (!job) {
     throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
   }
-  let steps = [
-    'Application Form',
-    'Online Quiz',
-    'Online Interview',
-    'Final Result',
-  ];
+  let steps;
+  let status;
   if (job.quizRequired) {
     steps = [
       'Application Form',
@@ -67,11 +63,13 @@ export async function addApplication(
       'Online Interview',
       'Final Result',
     ];
+    status = 'Online Quiz';
   } else {
     steps = ['Application Form', 'Online Interview', 'Final Result'];
+    status = 'Online Interview';
   }
   const data: ApplicationData = {
-    status: 'Application Form',
+    status: status,
     applicantID: applicantID,
     jobID,
     steps,
@@ -231,6 +229,18 @@ export async function startQuiz(
 
   if (!application) {
     throw new CodedError(ErrorMessage.ApplicationNotFound, ErrorCode.NotFound);
+  }
+
+  // Check if the quiz is already started
+
+  if (application.quizDeadline) {
+    throw new CodedError(ErrorMessage.QuizAlreadyStarted, ErrorCode.Conflict);
+  }
+
+  // Check if it's the correct status to start the quiz
+
+  if (application.status === 'Online Quiz') {
+    throw new CodedError(ErrorMessage.IncorrectStep, ErrorCode.Conflict);
   }
 
   // Check if the applicant has already started the quiz
