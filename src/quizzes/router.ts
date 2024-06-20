@@ -29,6 +29,7 @@ const quizRoutes = express.Router();
  *             properties:
  *               jobID:
  *                 type: string
+ *                 description: The ID of the job associated with the quiz
  *               questions:
  *                 type: array
  *                 items:
@@ -36,17 +37,33 @@ const quizRoutes = express.Router();
  *                   properties:
  *                     text:
  *                       type: string
+ *                       description: The text of the question
  *                     answers:
  *                       type: array
  *                       items:
  *                         type: string
+ *                         description: A possible answer to the question
  *                     correctAnswer:
  *                       type: string
+ *                       description: The correct answer to the question
  *                     score:
  *                       type: number
+ *                       description: The score of the question
+ *                 description: An array of questions for the quiz
+ *               passRatio:
+ *                 type: number
+ *                 description: The passing ratio for the quiz
+ *               quizDurationInMinutes:
+ *                 type: number
+ *                 description: The duration of the quiz in minutes
  *     responses:
  *       '200':
  *         description: Quiz added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               description: The ID of the added quiz
  *       '400':
  *         description: Bad request. Missing or invalid parameters.
  *       '401':
