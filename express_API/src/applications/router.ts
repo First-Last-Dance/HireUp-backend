@@ -8,6 +8,7 @@ import {
 import { CodedError } from '../util/error';
 import { ApplicationData } from './model';
 
+import * as pythonAPI from '../pythonAPI/controller';
 const applicationRoutes = express.Router();
 
 /**
@@ -579,6 +580,65 @@ applicationRoutes.post(
     Application.submitQuiz(applicantEmail, applicationID, answers)
       .then((result) => {
         res.status(200).send({ result: result ? 'Passed' : 'Failed' });
+      })
+      .catch((err) => {
+        if (err instanceof CodedError) {
+          res.status(err.code).send(err.message);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+  },
+);
+
+/**
+ * @swagger
+ * /application/{applicationID}/startInterviewStream:
+ *   get:
+ *     summary: Starts an interview stream for a given application.
+ *     description: Initiates the interview streaming process for the applicant associated with the given application ID.
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the application to start the interview stream for.
+ *     responses:
+ *       200:
+ *         description: Interview stream started successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ip_address:
+ *                   type: string
+ *                   example: "192.168.44.1"
+ *                 port:
+ *                   type: integer
+ *                   example: 5002
+ *       400:
+ *         description: Bad request. Possible reason could be missing or invalid application ID.
+ *       401:
+ *         description: Authorization information is missing or invalid.
+ *       500:
+ *         description: Internal server error.
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [Application]
+ */
+applicationRoutes.get(
+  '/:applicationID/startInterviewStream',
+  requireAuth,
+  requireApplicant,
+  (req, res) => {
+    const applicantEmail = res.locals.email;
+    const applicationID = req.params.applicationID;
+    pythonAPI
+      .startInterviewStream(applicantEmail, applicationID)
+      .then((result) => {
+        res.status(200).send(result);
       })
       .catch((err) => {
         if (err instanceof CodedError) {

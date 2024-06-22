@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+flask
+flask_socketio
+quart
+gunicorn
+waitress
+eventlet
+gevent
+opencv-python
+numpy
+av
