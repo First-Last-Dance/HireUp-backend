@@ -99,6 +99,6 @@ else
   echo "flask-socketio is not installed."
 fi
 
-# Start the FastAPI application
-echo "Starting FastAPI application..."
+# Start the Flask application
+echo "Starting Flask application..."
 uvicorn app.main:app --host 0.0.0.0 --port 5000

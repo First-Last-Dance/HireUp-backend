@@ -8,10 +8,10 @@ start_express_api_bg() {
   cd - || exit
 }
 
-# Function to start the FastAPI API in the background
-start_fastapi_api_bg() {
-  echo "Starting FastAPI API in the background..."
-  cd "fastapi_API" || exit
+# Function to start the flask API in the background
+start_flask_api_bg() {
+  echo "Starting flask API in the background..."
+  cd "flask_API" || exit
   source ./start.sh &
   cd - || exit
 }
@@ -22,19 +22,19 @@ start_express_api_terminal() {
   mintty bash -l -c "cd express_API && npm start"
 }
 
-# Function to start the FastAPI API in a new Git Bash window
-start_fastapi_api_terminal() {
-  echo "Starting FastAPI API in a new Git Bash window..."
-  mintty bash -l -c "cd fastapi_API && source ./start.sh"
+# Function to start the flask API in a new Git Bash window
+start_flask_api_terminal() {
+  echo "Starting flask API in a new Git Bash window..."
+  mintty bash -l -c "cd flask_API && source ./start.sh"
 }
 
 # Check the argument for running mode
 if [ "$1" == "terminal" ]; then
   start_express_api_terminal
-  start_fastapi_api_terminal
+  start_flask_api_terminal
 else
   # start_express_api_bg
-  start_fastapi_api_bg
+  start_flask_api_bg
   wait
   echo "Both APIs have been started in the background."
 fi

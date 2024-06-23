@@ -7,9 +7,25 @@ import {
 } from '../util/authentication';
 import { CodedError } from '../util/error';
 import { ApplicationData } from './model';
-
 import * as pythonAPI from '../pythonAPI/controller';
+import multer from 'multer';
+
 const applicationRoutes = express.Router();
+
+// Multer file filter to handle wrong file names
+const fileFilter = (req: any, file: any, cb: any) => {
+  if (file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+    // Accept the file
+    cb(null, true);
+  } else {
+    // Reject the file
+    cb(new Error('Invalid file type'), false);
+  }
+};
+const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter,
+});
 
 /**
  * @swagger
@@ -637,6 +653,100 @@ applicationRoutes.get(
     const applicationID = req.params.applicationID;
     pythonAPI
       .startInterviewStream(applicantEmail, applicationID)
+      .then((result) => {
+        res.status(200).send(result);
+      })
+      .catch((err) => {
+        if (err instanceof CodedError) {
+          res.status(err.code).send(err.message);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+  },
+);
+
+/**
+ * @swagger
+ * /application/{applicationID}/quizCalibration:
+ *   post:
+ *     summary: Submits calibration images for a quiz.
+ *     description: Receives four calibration images from the applicant and processes them for quiz calibration.
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the application for which the quiz calibration is being performed.
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pictureUpRight:
+ *                 type: string
+ *                 format: binary
+ *                 description: Calibration image captured with the camera facing up-right.
+ *               pictureUpLeft:
+ *                 type: string
+ *                 format: binary
+ *                 description: Calibration image captured with the camera facing up-left.
+ *               pictureDownRight:
+ *                 type: string
+ *                 format: binary
+ *                 description: Calibration image captured with the camera facing down-right.
+ *               pictureDownLeft:
+ *                 type: string
+ *                 format: binary
+ *                 description: Calibration image captured with the camera facing down-left.
+ *     responses:
+ *       200:
+ *         description: Calibration process completed successfully. Returns result of the calibration.
+ *       400:
+ *         description: Bad request. Possible reasons include missing images or invalid application ID.
+ *       401:
+ *         description: Unauthorized. User authentication failed.
+ *       500:
+ *         description: Internal server error.
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Application
+ */
+
+applicationRoutes.post(
+  '/:applicationID/quizCalibration',
+  requireAuth,
+  requireApplicant,
+  upload.fields([
+    { name: 'pictureUpRight', maxCount: 1 },
+    { name: 'pictureUpLeft', maxCount: 1 },
+    { name: 'pictureDownRight', maxCount: 1 },
+    { name: 'pictureDownLeft', maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const applicantEmail = res.locals.email;
+    const applicationID = req.params.applicationID;
+    const { pictureUpRight, pictureUpLeft, pictureDownRight, pictureDownLeft } =
+      req.files as any;
+
+    const pictureUpRightBase64 = pictureUpRight[0].buffer.toString('base64');
+    const pictureUpLeftBase64 = pictureUpLeft[0].buffer.toString('base64');
+    const pictureDownRightBase64 =
+      pictureDownRight[0].buffer.toString('base64');
+    const pictureDownLeftBase64 = pictureDownLeft[0].buffer.toString('base64');
+
+    pythonAPI
+      .quizCalibration(
+        applicantEmail,
+        applicationID,
+        pictureUpRightBase64,
+        pictureUpLeftBase64,
+        pictureDownRightBase64,
+        pictureDownLeftBase64,
+      )
       .then((result) => {
         res.status(200).send(result);
       })
