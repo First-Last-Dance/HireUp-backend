@@ -733,16 +733,18 @@ applicationRoutes.post(
     const { pictureUpRight, pictureUpLeft, pictureDownRight, pictureDownLeft } =
       req.files as any;
 
+    // Ensure all images are provided
     if (
-      !pictureDownLeft ||
-      !pictureDownRight ||
-      !pictureUpLeft ||
-      !pictureUpRight
+      !pictureUpRight?.[0] ||
+      !pictureUpLeft?.[0] ||
+      !pictureDownRight?.[0] ||
+      !pictureDownLeft?.[0]
     ) {
       return res.status(400).send('All images are required');
     }
+
     try {
-      console.log(pictureUpRight);
+      // Convert images to Base64
       const pictureUpRightBase64 = pictureUpRight[0].buffer.toString('base64');
       const pictureUpLeftBase64 = pictureUpLeft[0].buffer.toString('base64');
       const pictureDownRightBase64 =
@@ -750,27 +752,25 @@ applicationRoutes.post(
       const pictureDownLeftBase64 =
         pictureDownLeft[0].buffer.toString('base64');
 
-      pythonAPI
-        .quizCalibration(
-          applicantEmail,
-          applicationID,
-          pictureUpRightBase64,
-          pictureUpLeftBase64,
-          pictureDownRightBase64,
-          pictureDownLeftBase64,
-        )
-        .then((result) => {
-          res.status(200).send(result);
-        })
-        .catch((err) => {
-          if (err instanceof CodedError) {
-            res.status(err.code).send(err.message);
-          } else {
-            res.status(500).send(err);
-          }
-        });
+      // Call the python API with the images
+      const result = await pythonAPI.quizCalibration(
+        applicantEmail,
+        applicationID,
+        pictureUpRightBase64,
+        pictureUpLeftBase64,
+        pictureDownRightBase64,
+        pictureDownLeftBase64,
+      );
+
+      // Send the result back to the client
+      res.status(200).send(result);
     } catch (err) {
-      res.status(500).send(err);
+      // Handle errors from the python API
+      if (err instanceof CodedError) {
+        res.status(err.code).send(err.message);
+      } else {
+        res.status(500).send(err);
+      }
     }
   },
 );
