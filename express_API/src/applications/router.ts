@@ -723,46 +723,40 @@ applicationRoutes.post(
   '/:applicationID/quizCalibration',
   requireAuth,
   requireApplicant,
-  upload.fields([
-    { name: 'pictureUpRight', maxCount: 1 },
-    { name: 'pictureUpLeft', maxCount: 1 },
-    { name: 'pictureDownRight', maxCount: 1 },
-    { name: 'pictureDownLeft', maxCount: 1 },
-  ]),
   async (req, res) => {
     const applicantEmail = res.locals.email;
     const applicationID = req.params.applicationID;
 
     const { pictureUpRight, pictureUpLeft, pictureDownRight, pictureDownLeft } =
-      req.files as any;
+      req.body;
 
     // Ensure all images are provided
     if (
-      !pictureUpRight?.[0] ||
-      !pictureUpLeft?.[0] ||
-      !pictureDownRight?.[0] ||
-      !pictureDownLeft?.[0]
+      !pictureUpRight ||
+      !pictureUpLeft ||
+      !pictureDownRight ||
+      !pictureDownLeft
     ) {
       return res.status(400).send('All images are required');
     }
 
     try {
       // Convert images to Base64
-      const pictureUpRightBase64 = pictureUpRight[0].buffer.toString('base64');
-      const pictureUpLeftBase64 = pictureUpLeft[0].buffer.toString('base64');
-      const pictureDownRightBase64 =
-        pictureDownRight[0].buffer.toString('base64');
-      const pictureDownLeftBase64 =
-        pictureDownLeft[0].buffer.toString('base64');
+      // const pictureUpRightBase64 = pictureUpRight[0].buffer.toString('base64');
+      // const pictureUpLeftBase64 = pictureUpLeft[0].buffer.toString('base64');
+      // const pictureDownRightBase64 =
+      //   pictureDownRight[0].buffer.toString('base64');
+      // const pictureDownLeftBase64 =
+      //   pictureDownLeft[0].buffer.toString('base64');
 
       // Call the python API with the images
       const result = await pythonAPI.quizCalibration(
         applicantEmail,
         applicationID,
-        pictureUpRightBase64,
-        pictureUpLeftBase64,
-        pictureDownRightBase64,
-        pictureDownLeftBase64,
+        pictureUpRight,
+        pictureUpLeft,
+        pictureDownRight,
+        pictureDownLeft,
       );
 
       // Send the result back to the client
