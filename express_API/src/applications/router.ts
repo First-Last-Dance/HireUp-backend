@@ -742,31 +742,58 @@ applicationRoutes.post(
       return res.status(400).send('All images are required');
     }
 
-    const pictureUpRightBase64 = pictureUpRight[0].buffer.toString('base64');
-    const pictureUpLeftBase64 = pictureUpLeft[0].buffer.toString('base64');
-    const pictureDownRightBase64 =
-      pictureDownRight[0].buffer.toString('base64');
-    const pictureDownLeftBase64 = pictureDownLeft[0].buffer.toString('base64');
+    console.log(pictureUpRight);
 
-    pythonAPI
-      .quizCalibration(
-        applicantEmail,
-        applicationID,
-        pictureUpRightBase64,
-        pictureUpLeftBase64,
-        pictureDownRightBase64,
-        pictureDownLeftBase64,
-      )
-      .then((result) => {
-        res.status(200).send(result);
-      })
-      .catch((err) => {
-        if (err instanceof CodedError) {
-          res.status(err.code).send(err.message);
-        } else {
-          res.status(500).send(err);
-        }
-      });
+    console.log(pictureUpRight[0].buffer);
+
+    try {
+      const pictureUpRightBase64 = pictureUpRight[0].buffer.toString('base64');
+      const pictureUpLeftBase64 = pictureUpLeft[0].buffer.toString('base64');
+      const pictureDownRightBase64 =
+        pictureDownRight[0].buffer.toString('base64');
+      const pictureDownLeftBase64 =
+        pictureDownLeft[0].buffer.toString('base64');
+
+      pythonAPI
+        .quizCalibration(
+          applicantEmail,
+          applicationID,
+          pictureUpRightBase64,
+          pictureUpLeftBase64,
+          pictureDownRightBase64,
+          pictureDownLeftBase64,
+        )
+        .then((result) => {
+          res.status(200).send(result);
+        })
+        .catch((err) => {
+          if (err instanceof CodedError) {
+            res.status(err.code).send(err.message);
+          } else {
+            res.status(500).send(err);
+          }
+        });
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  },
+);
+
+// Error handling middleware
+applicationRoutes.use(
+  (
+    err: Error,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ): void => {
+    if (err instanceof multer.MulterError) {
+      // Handle Multer errors
+      res.status(400).send(`Multer error: ${err.message}`);
+    } else {
+      // Handle other errors
+      res.status(500).send(`Server error: ${err.message}`);
+    }
   },
 );
 
