@@ -371,9 +371,11 @@ applicantRoutes.use(
     if (err instanceof multer.MulterError) {
       // Handle Multer errors
       res.status(400).send(`Multer error: ${err.message}`);
+      next();
     } else {
       // Handle other errors
       res.status(500).send(`Server error: ${err.message}`);
+      next();
     }
   },
 );

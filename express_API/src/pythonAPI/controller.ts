@@ -1,3 +1,4 @@
+import e from 'express';
 import * as Applicant from '../applicants/service';
 import * as Application from '../applications/service';
 import { CodedError, ErrorCode, ErrorMessage } from '../util/error';
@@ -86,6 +87,170 @@ export async function quizCalibration(
       PictureUpRight: pictureUpRight,
       PictureUpLeft: pictureUpLeft,
       PictureDownRight: pictureDownRight,
+      PictureDownLeft: pictureDownLeft,
+    })
+    .catch((err) => {
+      throw err;
+    });
+  return response.data;
+}
+
+export async function quizCalibrationUpRight(
+  applicantEmail: string,
+  applicationID: string,
+  pictureUpRight: string,
+) {
+  // Get the details of the application
+  const application = await Application.getApplicationByID(applicationID);
+
+  if (!application) {
+    throw new CodedError(ErrorMessage.ApplicationNotFound, ErrorCode.NotFound);
+  }
+
+  // Get the applicant ID
+  const applicantID = await Applicant.getApplicantIDByEmail(applicantEmail);
+
+  // Check if the applicant is the owner of the application
+  if (application.applicantID.toString() !== applicantID.toString()) {
+    throw new CodedError(
+      ErrorMessage.ApplicantIsNotTheOwnerOfTheApplication,
+      ErrorCode.Forbidden,
+    );
+  }
+
+  // Check if the application is in the right state
+
+  if (application.status !== 'Online Quiz') {
+    throw new CodedError(ErrorMessage.IncorrectStep, ErrorCode.Conflict);
+  }
+
+  // invoke the python API
+  const response = await axios
+    .post(process.env.Python_Host + '/quiz_calibration_up_right', {
+      ApplicationID: applicationID,
+      PictureUpRight: pictureUpRight,
+    })
+    .catch((err) => {
+      throw err;
+    });
+  return response.data;
+}
+
+export async function quizCalibrationUpLeft(
+  applicantEmail: string,
+  applicationID: string,
+  pictureUpLeft: string,
+) {
+  // Get the details of the application
+  const application = await Application.getApplicationByID(applicationID);
+
+  if (!application) {
+    throw new CodedError(ErrorMessage.ApplicationNotFound, ErrorCode.NotFound);
+  }
+
+  // Get the applicant ID
+  const applicantID = await Applicant.getApplicantIDByEmail(applicantEmail);
+
+  // Check if the applicant is the owner of the application
+  if (application.applicantID.toString() !== applicantID.toString()) {
+    throw new CodedError(
+      ErrorMessage.ApplicantIsNotTheOwnerOfTheApplication,
+      ErrorCode.Forbidden,
+    );
+  }
+
+  // Check if the application is in the right state
+
+  if (application.status !== 'Online Quiz') {
+    throw new CodedError(ErrorMessage.IncorrectStep, ErrorCode.Conflict);
+  }
+
+  // invoke the python API
+  const response = await axios
+    .post(process.env.Python_Host + '/quiz_calibration_up_left', {
+      ApplicationID: applicationID,
+      PictureUpLeft: pictureUpLeft,
+    })
+    .catch((err) => {
+      throw err;
+    });
+  return response.data;
+}
+
+export async function quizCalibrationDownRight(
+  applicantEmail: string,
+  applicationID: string,
+  pictureDownRight: string,
+) {
+  // Get the details of the application
+  const application = await Application.getApplicationByID(applicationID);
+
+  if (!application) {
+    throw new CodedError(ErrorMessage.ApplicationNotFound, ErrorCode.NotFound);
+  }
+
+  // Get the applicant ID
+  const applicantID = await Applicant.getApplicantIDByEmail(applicantEmail);
+
+  // Check if the applicant is the owner of the application
+  if (application.applicantID.toString() !== applicantID.toString()) {
+    throw new CodedError(
+      ErrorMessage.ApplicantIsNotTheOwnerOfTheApplication,
+      ErrorCode.Forbidden,
+    );
+  }
+
+  // Check if the application is in the right state
+
+  if (application.status !== 'Online Quiz') {
+    throw new CodedError(ErrorMessage.IncorrectStep, ErrorCode.Conflict);
+  }
+
+  // invoke the python API
+  const response = await axios
+    .post(process.env.Python_Host + '/quiz_calibration_up_left', {
+      ApplicationID: applicationID,
+      pictureDownRight: pictureDownRight,
+    })
+    .catch((err) => {
+      throw err;
+    });
+  return response.data;
+}
+
+export async function quizCalibrationDownLeft(
+  applicantEmail: string,
+  applicationID: string,
+  pictureDownLeft: string,
+) {
+  // Get the details of the application
+  const application = await Application.getApplicationByID(applicationID);
+
+  if (!application) {
+    throw new CodedError(ErrorMessage.ApplicationNotFound, ErrorCode.NotFound);
+  }
+
+  // Get the applicant ID
+  const applicantID = await Applicant.getApplicantIDByEmail(applicantEmail);
+
+  // Check if the applicant is the owner of the application
+  if (application.applicantID.toString() !== applicantID.toString()) {
+    throw new CodedError(
+      ErrorMessage.ApplicantIsNotTheOwnerOfTheApplication,
+      ErrorCode.Forbidden,
+    );
+  }
+
+  // Check if the application is in the right state
+
+  if (application.status !== 'Online Quiz') {
+    throw new CodedError(ErrorMessage.IncorrectStep, ErrorCode.Conflict);
+  }
+
+  // invoke the python API
+  const response = await axios
+    .post(process.env.Python_Host + '/quiz_calibration_down_left', {
+      ApplicationID: applicationID,
       PictureDownLeft: pictureDownLeft,
     })
     .catch((err) => {

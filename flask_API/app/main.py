@@ -62,6 +62,10 @@ def save_calibration_images(pictureUpRight, pictureUpLeft, pictureDownRight, pic
     
     # Loop through each image, decode, and save
     for position, image_data in images.items():
+        # Skip if image_data is None
+        if image_data is None:
+            continue
+        
         # Decode the base64 image
         image_bytes = base64.b64decode(image_data)
         
@@ -136,6 +140,58 @@ async def quiz_save_calibration():
         return jsonify({'error': 'All pictures are required'}), 400
     save_calibration_images(picture_up_right, picture_up_left, picture_down_right, picture_down_left, application_id, is_quiz)
     return jsonify({'message': 'Calibration images saved'})
+
+@app.route('/quiz_calibration_up_right', methods=['POST'])
+async def quiz_save_calibration_up_right():
+    data = await request.get_json()
+    application_id = data.get('ApplicationID')
+    is_quiz = True
+    if not application_id:
+        return jsonify({'error': 'ApplicationID is required'}), 400
+    picture_up_right = data.get('PictureUpRight')
+    if not picture_up_right:
+        return jsonify({'error': 'PictureUpRight is required'}), 400
+    save_calibration_images(picture_up_right, None, None, None, application_id, is_quiz)
+    return jsonify({'message': 'Calibration image saved'})
+
+@app.route('/quiz_calibration_up_left', methods=['POST'])
+async def quiz_save_calibration_up_left():
+    data = await request.get_json()
+    application_id = data.get('ApplicationID')
+    is_quiz = True
+    if not application_id:
+        return jsonify({'error': 'ApplicationID is required'}), 400
+    picture_up_left = data.get('PictureUpLeft')
+    if not picture_up_left:
+        return jsonify({'error': 'PictureUpLeft is required'}), 400
+    save_calibration_images(None, picture_up_left, None, None, application_id, is_quiz)
+    return jsonify({'message': 'Calibration image saved'})
+
+@app.route('/quiz_calibration_down_right', methods=['POST'])
+async def quiz_save_calibration_down_right():
+    data = await request.get_json()
+    application_id = data.get('ApplicationID')
+    is_quiz = True
+    if not application_id:
+        return jsonify({'error': 'ApplicationID is required'}), 400
+    picture_down_right = data.get('PictureDownRight')
+    if not picture_down_right:
+        return jsonify({'error': 'PictureDownRight is required'}), 400
+    save_calibration_images(None, None, picture_down_right, None, application_id, is_quiz)
+    return jsonify({'message': 'Calibration image saved'})
+
+@app.route('/quiz_calibration_down_left', methods=['POST'])
+async def quiz_save_calibration_down_left():
+    data = await request.get_json()
+    application_id = data.get('ApplicationID')
+    is_quiz = True
+    if not application_id:
+        return jsonify({'error': 'ApplicationID is required'}), 400
+    picture_down_left = data.get('PictureDownLeft')
+    if not picture_down_left:
+        return jsonify({'error': 'PictureDownLeft is required'}), 400
+    save_calibration_images(None, None, None, picture_down_left, application_id, is_quiz)
+    return jsonify({'message': 'Calibration image saved'})
 
 @app.route('/interview_calibration', methods=['POST'])
 async def interview_save_calibration():

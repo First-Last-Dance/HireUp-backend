@@ -778,6 +778,314 @@ applicationRoutes.post(
   },
 );
 
+/**
+ * @swagger
+ * /application/{applicationID}/quizCalibration/upRight:
+ *   post:
+ *     summary: Submits the up-right calibration image for a quiz.
+ *     description: Receives the up-right calibration image from the applicant and processes it for quiz calibration.
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the application for which the quiz calibration is being performed.
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pictureUpRight:
+ *                 type: string
+ *                 format: binary
+ *                 description: Calibration image captured with the camera facing up-right.
+ *     responses:
+ *       200:
+ *         description: Up-right calibration image uploaded successfully.
+ *       400:
+ *         description: Bad request. Possible reasons include missing image or invalid application ID.
+ *       401:
+ *         description: Unauthorized. User authentication failed.
+ *       500:
+ *         description: Internal server error.
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Application
+ */
+
+applicationRoutes.post(
+  '/:applicationID/quizCalibration/upRight',
+  requireAuth,
+  requireApplicant,
+  upload.single('pictureUpRight'),
+  async (req, res) => {
+    const applicantEmail = res.locals.email;
+    const applicationID = req.params.applicationID;
+    const pictureUpRight = req.file;
+
+    // Ensure the image is provided
+    if (!pictureUpRight) {
+      return res.status(400).send('Up-right image is required');
+    }
+
+    try {
+      // Convert image to Base64
+      const pictureUpRightBase64 = pictureUpRight.buffer.toString('base64');
+
+      // Call the python API with the image
+      const result = await pythonAPI.quizCalibrationUpRight(
+        applicantEmail,
+        applicationID,
+        pictureUpRightBase64,
+      );
+
+      // Send the result back to the client
+      res.status(200).send(result);
+    } catch (err) {
+      // Handle errors from the python API
+      if (err instanceof CodedError) {
+        res.status(err.code).send(err.message);
+      } else {
+        res.status(500).send(err);
+      }
+    }
+  },
+);
+
+/**
+ * @swagger
+ * /application/{applicationID}/quizCalibration/upLeft:
+ *   post:
+ *     summary: Submits the up-left calibration image for a quiz.
+ *     description: Receives the up-left calibration image from the applicant and processes it for quiz calibration.
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the application for which the quiz calibration is being performed.
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pictureUpLeft:
+ *                 type: string
+ *                 format: binary
+ *                 description: Calibration image captured with the camera facing up-left.
+ *     responses:
+ *       200:
+ *         description: Up-left calibration image uploaded successfully.
+ *       400:
+ *         description: Bad request. Possible reasons include missing image or invalid application ID.
+ *       401:
+ *         description: Unauthorized. User authentication failed.
+ *       500:
+ *         description: Internal server error.
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Application
+ */
+
+applicationRoutes.post(
+  '/:applicationID/quizCalibration/upLeft',
+  requireAuth,
+  requireApplicant,
+  upload.single('pictureUpLeft'),
+  async (req, res) => {
+    const applicantEmail = res.locals.email;
+    const applicationID = req.params.applicationID;
+    const pictureUpLeft = req.file;
+
+    // Ensure the image is provided
+    if (!pictureUpLeft) {
+      return res.status(400).send('Up-left image is required');
+    }
+
+    try {
+      // Convert image to Base64
+      const pictureUpLeftBase64 = pictureUpLeft.buffer.toString('base64');
+
+      // Call the python API with the image
+      const result = await pythonAPI.quizCalibrationUpLeft(
+        applicantEmail,
+        applicationID,
+        pictureUpLeftBase64,
+      );
+
+      // Send the result back to the client
+      res.status(200).send(result);
+    } catch (err) {
+      // Handle errors from the python API
+      if (err instanceof CodedError) {
+        res.status(err.code).send(err.message);
+      } else {
+        res.status(500).send(err);
+      }
+    }
+  },
+);
+
+/**
+ * @swagger
+ * /application/{applicationID}/quizCalibration/downRight:
+ *   post:
+ *     summary: Submits the down-right calibration image for a quiz.
+ *     description: Receives the down-right calibration image from the applicant and processes it for quiz calibration.
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the application for which the quiz calibration is being performed.
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pictureDownRight:
+ *                 type: string
+ *                 format: binary
+ *                 description: Calibration image captured with the camera facing down-right.
+ *     responses:
+ *       200:
+ *         description: Down-right calibration image uploaded successfully.
+ *       400:
+ *         description: Bad request. Possible reasons include missing image or invalid application ID.
+ *       401:
+ *         description: Unauthorized. User authentication failed.
+ *       500:
+ *         description: Internal server error.
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Application
+ */
+
+applicationRoutes.post(
+  '/:applicationID/quizCalibration/downRight',
+  requireAuth,
+  requireApplicant,
+  upload.single('pictureDownRight'),
+  async (req, res) => {
+    const applicantEmail = res.locals.email;
+    const applicationID = req.params.applicationID;
+    const pictureDownRight = req.file;
+
+    // Ensure the image is provided
+    if (!pictureDownRight) {
+      return res.status(400).send('Down-right image is required');
+    }
+
+    try {
+      // Convert image to Base64
+      const pictureDownRightBase64 = pictureDownRight.buffer.toString('base64');
+
+      // Call the python API with the image
+      const result = await pythonAPI.quizCalibrationDownRight(
+        applicantEmail,
+        applicationID,
+        pictureDownRightBase64,
+      );
+
+      // Send the result back to the client
+      res.status(200).send(result);
+    } catch (err) {
+      // Handle errors from the python API
+      if (err instanceof CodedError) {
+        res.status(err.code).send(err.message);
+      } else {
+        res.status(500).send(err);
+      }
+    }
+  },
+);
+
+/**
+ * @swagger
+ * /application/{applicationID}/quizCalibration/downLeft:
+ *   post:
+ *     summary: Submits the down-left calibration image for a quiz.
+ *     description: Receives the down-left calibration image from the applicant and processes it for quiz calibration.
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the application for which the quiz calibration is being performed.
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pictureDownLeft:
+ *                 type: string
+ *                 format: binary
+ *                 description: Calibration image captured with the camera facing down-left.
+ *     responses:
+ *       200:
+ *         description: Down-left calibration image uploaded successfully.
+ *       400:
+ *         description: Bad request. Possible reasons include missing image or invalid application ID.
+ *       401:
+ *         description: Unauthorized. User authentication failed.
+ *       500:
+ *         description: Internal server error.
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Application
+ */
+
+applicationRoutes.post(
+  '/:applicationID/quizCalibration/downLeft',
+  requireAuth,
+  requireApplicant,
+  upload.single('pictureDownLeft'),
+  async (req, res) => {
+    const applicantEmail = res.locals.email;
+    const applicationID = req.params.applicationID;
+    const pictureDownLeft = req.file;
+
+    // Ensure the image is provided
+    if (!pictureDownLeft) {
+      return res.status(400).send('Down-left image is required');
+    }
+
+    try {
+      // Convert image to Base64
+      const pictureDownLeftBase64 = pictureDownLeft.buffer.toString('base64');
+
+      // Call the python API with the image
+      const result = await pythonAPI.quizCalibrationDownLeft(
+        applicantEmail,
+        applicationID,
+        pictureDownLeftBase64,
+      );
+
+      // Send the result back to the client
+      res.status(200).send(result);
+    } catch (err) {
+      // Handle errors from the python API
+      if (err instanceof CodedError) {
+        res.status(err.code).send(err.message);
+      } else {
+        res.status(500).send(err);
+      }
+    }
+  },
+);
+
 // Error handling middleware
 applicationRoutes.use(
   (
@@ -789,9 +1097,11 @@ applicationRoutes.use(
     if (err instanceof multer.MulterError) {
       // Handle Multer errors
       res.status(400).send(`Multer error: ${err.message}`);
+      next();
     } else {
       // Handle other errors
       res.status(500).send(`Server error: ${err.message}`);
+      next();
     }
   },
 );
