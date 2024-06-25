@@ -5,6 +5,7 @@ import swaggerUI from 'swagger-ui-express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import routes from './router';
+import bodyParser from 'body-parser';
 
 // Config the .env file
 dotenv.config();
@@ -42,6 +43,10 @@ app.use(express.json());
 
 // Set the main router
 app.use('/', routes);
+
+// Increase the body size limit
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // Connect to DB
 

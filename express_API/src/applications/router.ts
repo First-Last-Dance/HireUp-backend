@@ -684,26 +684,31 @@ applicationRoutes.get(
  *         description: The ID of the application for which the quiz calibration is being performed.
  *     requestBody:
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
  *               pictureUpRight:
  *                 type: string
- *                 format: binary
- *                 description: Calibration image captured with the camera facing up-right.
+ *                 format: base64
+ *                 description: Calibration image captured with the camera facing up-right, encoded in base64.
  *               pictureUpLeft:
  *                 type: string
- *                 format: binary
- *                 description: Calibration image captured with the camera facing up-left.
+ *                 format: base64
+ *                 description: Calibration image captured with the camera facing up-left, encoded in base64.
  *               pictureDownRight:
  *                 type: string
- *                 format: binary
- *                 description: Calibration image captured with the camera facing down-right.
+ *                 format: base64
+ *                 description: Calibration image captured with the camera facing down-right, encoded in base64.
  *               pictureDownLeft:
  *                 type: string
- *                 format: binary
- *                 description: Calibration image captured with the camera facing down-left.
+ *                 format: base64
+ *                 description: Calibration image captured with the camera facing down-left, encoded in base64.
+ *             required:
+ *               - pictureUpRight
+ *               - pictureUpLeft
+ *               - pictureDownRight
+ *               - pictureDownLeft
  *     responses:
  *       200:
  *         description: Calibration process completed successfully. Returns result of the calibration.
