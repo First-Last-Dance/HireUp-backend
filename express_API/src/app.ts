@@ -39,14 +39,14 @@ const openapiSpecification = swaggerJsdoc(options);
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(openapiSpecification));
 
 // Add the json parser
-app.use(express.json());
-
-// Set the main router
-app.use('/', routes);
+// app.use(express.json());
 
 // Increase the body size limit
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
+// Set the main router
+app.use('/', routes);
 
 // Connect to DB
 
