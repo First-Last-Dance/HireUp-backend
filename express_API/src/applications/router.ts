@@ -741,12 +741,8 @@ applicationRoutes.post(
     ) {
       return res.status(400).send('All images are required');
     }
-
-    console.log(pictureUpRight);
-
-    console.log(pictureUpRight[0].buffer);
-
     try {
+      console.log(pictureUpRight);
       const pictureUpRightBase64 = pictureUpRight[0].buffer.toString('base64');
       const pictureUpLeftBase64 = pictureUpLeft[0].buffer.toString('base64');
       const pictureDownRightBase64 =
