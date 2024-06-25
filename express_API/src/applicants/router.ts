@@ -13,7 +13,10 @@ const fileFilter = (req: any, file: any, cb: any) => {
     cb(null, true);
   } else {
     // Reject the file
-    cb(new Error('Invalid file type'), false);
+    cb(
+      new multer.MulterError('LIMIT_UNEXPECTED_FILE', 'Invalid file type'),
+      false,
+    );
   }
 };
 const upload = multer({
