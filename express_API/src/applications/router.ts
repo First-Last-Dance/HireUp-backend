@@ -729,8 +729,18 @@ applicationRoutes.post(
   async (req, res) => {
     const applicantEmail = res.locals.email;
     const applicationID = req.params.applicationID;
+
     const { pictureUpRight, pictureUpLeft, pictureDownRight, pictureDownLeft } =
       req.files as any;
+
+    if (
+      !pictureDownLeft ||
+      !pictureDownRight ||
+      !pictureUpLeft ||
+      !pictureUpRight
+    ) {
+      return res.status(400).send('All images are required');
+    }
 
     const pictureUpRightBase64 = pictureUpRight[0].buffer.toString('base64');
     const pictureUpLeftBase64 = pictureUpLeft[0].buffer.toString('base64');
