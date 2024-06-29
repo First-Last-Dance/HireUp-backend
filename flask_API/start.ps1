@@ -119,7 +119,7 @@ Start-Process -NoNewWindow -FilePath "powershell" -ArgumentList "-Command", "uvi
 # Run topics_population.py in a new terminal
 Write-Host "Running topics_population.py in a new terminal..."
 if ($IsWindows) {
-    Start-Process -FilePath "powershell" -ArgumentList "-Command", "python models\HireUp_Question_Generation\topics_population.py"
+    Start-Process -FilePath "powershell" -ArgumentList "-NoExit", "-Command", "python models\HireUp_Question_Generation\topics_population.py; if ($LASTEXITCODE -ne 0) { pause }"
 } else {
-    Start-Process -FilePath "bash" -ArgumentList "-c", "source ./venv/bin/activate && python models\HireUp_Question_Generation\topics_population.py"
+    Start-Process -FilePath "bash" -ArgumentList "-c", "source ./venv/bin/activate && python models\HireUp_Question_Generation\topics_population.py; read -p 'Press [Enter] key to continue...'"
 }
