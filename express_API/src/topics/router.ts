@@ -12,10 +12,10 @@ const topicRoutes = express.Router();
 
 /**
  * @swagger
- * /topics/names:
+ * /topic/names:
  *   get:
  *     summary: Get all topics' names
- *     tags: [Topics]
+ *     tags: [Topic]
  *     responses:
  *       200:
  *         description: List of topic names
@@ -43,10 +43,10 @@ topicRoutes.get('/names', async (req, res) => {
 
 /**
  * @swagger
- * /topics:
+ * /topic:
  *   get:
  *     summary: Get all given topics
- *     tags: [Topics]
+ *     tags: [Topic]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -91,10 +91,10 @@ topicRoutes.get('/', requireAuth, requireCompany, async (req, res) => {
 
 /**
  * @swagger
- * /topics:
+ * /topic:
  *   post:
  *     summary: Add a new topic
- *     tags: [Topics]
+ *     tags: [Topic]
  *     security:
  *       - bearerAuth: []
  *     requestBody:

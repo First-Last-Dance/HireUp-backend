@@ -2,12 +2,15 @@ from flask import Flask
 from flask_socketio import SocketIO
 import os
 import argparse
+import json  # Import json module
 
 # Set up argument parsing
 parser = argparse.ArgumentParser(description='Run a Flask socket server.')
 parser.add_argument('--port', type=int, default=5001, help='Port to run the Flask socket server on.')
 parser.add_argument('--ApplicationID', type=str, required=True, help='Application ID to name the video file.')
 parser.add_argument('--isQuiz', type=bool, default=False, help='Flag to determine the directory for saving the video (quiz_video if true, else interview_video).')
+parser.add_argument('--questions', type=str, default='[]', help='JSON string of questions for the quiz.')  # Add questions argument
+
 args = parser.parse_args()
 
 app = Flask(__name__)
@@ -19,11 +22,14 @@ print(args.isQuiz)
 question_counter = 0
 video_writer = None
 
-question_list = [
-    "What is your name?",
-    "What is your age?",
-    "What is your salary?",
-]
+# Deserialize the JSON string of questions
+question_answer_list = json.loads(args.questions)  # Use the deserialized list
+
+# Create a list of questions from the question-answer pairs
+question_list = [qa['question'] for qa in question_answer_list]
+
+# create a list of answers from the question-answer pairs
+answer_list = [qa['answer'] for qa in question_answer_list]
 
 def get_next_question():
     if question_list:

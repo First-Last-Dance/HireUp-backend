@@ -1,6 +1,8 @@
 import e from 'express';
 import * as Applicant from '../applicants/service';
 import * as Application from '../applications/service';
+import * as Job from '../jobs/service';
+``;
 import { CodedError, ErrorCode, ErrorMessage } from '../util/error';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
@@ -37,12 +39,30 @@ export async function startInterviewStream(
     throw new CodedError(ErrorMessage.IncorrectStep, ErrorCode.Conflict);
   }
 
+  // Get the job ID
+  const jobID = application.jobID;
+
+  // Check if the job exists
+  const job = await Job.getJobByID(jobID.toString());
+  if (!job) {
+    throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
+  }
+
+  // Get the questions of the job
+
+  const questions = job.questions;
+
+  if (!questions || questions.length === 0) {
+    throw new CodedError(ErrorMessage.NoQuestions, ErrorCode.NotFound);
+  }
+
   // invoke the python API
 
   const response = await axios.post(
     process.env.Python_Host + '/interview_stream',
     {
       ApplicationID: applicantID, // Assuming you expect 'title' in the request body
+      Questions: questions,
     },
   );
   return response.data;

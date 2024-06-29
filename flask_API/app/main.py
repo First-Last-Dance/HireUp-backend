@@ -4,6 +4,8 @@ from quart import Quart, jsonify, request
 import sys
 import os
 import base64
+import json
+
 
 
 app = Quart(__name__)
@@ -17,7 +19,7 @@ def find_free_port(start):
         port += 1
     return port
 
-def run_socket_process(port, ApplicationID, isQuiz):
+def run_socket_process(port, ApplicationID, isQuiz, questions):
     """Run the socket process with the given port and log the output."""
     # Ensure the current directory (project root) is in the PYTHONPATH
     env = os.environ.copy()
@@ -33,12 +35,17 @@ def run_socket_process(port, ApplicationID, isQuiz):
     logs_directory = os.path.join(current_directory, 'logs')
     if not os.path.exists(logs_directory):
         os.makedirs(logs_directory)
+        
+    # Serialize questions array to JSON string
+    questions_json = None
+    if not isQuiz:
+        questions_json = json.dumps(questions)
     
     # Correctly reference the Flask app object within socket_process.py
     if isQuiz:
         command = f'python app/socket_process.py --port={port} --ApplicationID={ApplicationID} --isQuiz={isQuiz}'
     else:
-        command = f'python app/socket_process.py --port={port} --ApplicationID={ApplicationID}'
+        command = f'python app/socket_process.py --port={port} --ApplicationID={ApplicationID}  --questions=\'{questions_json}\''
     # Define log file path
     log_file_path = os.path.join(logs_directory, f'socket_process_{port}.log')
     with open(log_file_path, 'w') as log_file:
@@ -87,11 +94,12 @@ async def interview_new_socket():
     # Extract ApplicationID from the request body
     data = await request.get_json()  # Await the JSON data
     application_id = data.get('ApplicationID')
+    questions = data.get('Questions')
     is_quiz = False
     if not application_id:
         return jsonify({'error': 'ApplicationID is required'}), 400
     port = find_free_port(PORT_START)
-    run_socket_process(port, application_id, is_quiz)
+    run_socket_process(port, application_id, is_quiz, questions)
     active_ports.add(port)
     ip_address = socket.gethostbyname(socket.gethostname())
     return jsonify({'ip_address': ip_address, 'port': port})
