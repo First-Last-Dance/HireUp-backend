@@ -107,6 +107,10 @@ def handle_disconnect():
         video_writer.close()
         print(f'Video file saved')
         video_writer = None
+        
+    # Run the interview process
+    command = f'python app/models/HireUp_Interview/Interview.py --videoPath={video_output_path} --topLeftImagePath=top_left.png --topRightImagePath=top_right.png --bottomRightImagePath=bottom_right.png --bottomLeftImagePath=bottom_left.png --correctAnswers="{answer_list}"'
+    
 
 if __name__ == '__main__':
     socketio.run(app, port=args.port)
