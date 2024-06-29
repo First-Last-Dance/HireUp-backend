@@ -745,6 +745,13 @@ applicationRoutes.post(
       return res.status(400).send('All images are required');
     }
 
+    // Remove the data URL prefix
+    const base64Prefix = 'data:image/jpeg;base64,';
+    const pictureUpRightBase64 = pictureUpRight.replace(base64Prefix, '');
+    const pictureUpLeftBase64 = pictureUpLeft.replace(base64Prefix, '');
+    const pictureDownRightBase64 = pictureDownRight.replace(base64Prefix, '');
+    const pictureDownLeftBase64 = pictureDownLeft.replace(base64Prefix, '');
+
     try {
       // Convert images to Base64
       // const pictureUpRightBase64 = pictureUpRight[0].buffer.toString('base64');

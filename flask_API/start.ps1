@@ -36,6 +36,7 @@ function Is-VenvDirectoryPresent {
 function Install-Dependencies {
     Write-Host "Installing dependencies..."
     pip install -r requirements.txt --quiet --ignore-installed
+    python -m spacy download en_core_web_sm --quiet
 }
 
 # Function to check if all dependencies from requirements.txt are installed
@@ -94,6 +95,9 @@ if (-not (Is-EnvFilePresent)) {
     Write-Host "Creating .env file..."
     New-Item -ItemType File -Path .env
     Add-Content -Path .env -Value "DATABASE_URL=sqlite:///./test.db"
+    Add-Content -Path .env -Value "EXPRESS_SERVER_ADDRESS= http://localhost:3000"
+    Add-Content -Path .env -Value "EXPRESS_SERVER_EMAIL = email@example.com"
+    Add-Content -Path .env -Value "EXPRESS_SERVER_PASSWORD = password"
 }
 
 # Determine the current python environment
@@ -110,3 +114,12 @@ if ($LASTEXITCODE -eq 0) {
 # Start the Flask application
 Write-Host "Starting Flask application..."
 Start-Process -NoNewWindow -FilePath "powershell" -ArgumentList "-Command", "uvicorn app.main:app --host 0.0.0.0 --port 5000"
+
+
+# Run topics_population.py in a new terminal
+Write-Host "Running topics_population.py in a new terminal..."
+if ($IsWindows) {
+    Start-Process -FilePath "powershell" -ArgumentList "-Command", "python models\HireUp_Question_Generation\topics_population.py"
+} else {
+    Start-Process -FilePath "bash" -ArgumentList "-c", "source ./venv/bin/activate && python models\HireUp_Question_Generation\topics_population.py"
+}

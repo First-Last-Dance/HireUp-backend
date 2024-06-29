@@ -8,6 +8,8 @@ export class CodedError extends Error {
 }
 // message enum
 export enum ErrorMessage {
+  TopicAlreadyExists = 'Topic already exists',
+  TopicNotFound = 'Topic not found',
   IncorrectStep = 'Incorrect step',
   QuizNotStarted = 'Quiz not started',
   QuizAlreadyStarted = 'Quiz already started',

@@ -11,3 +11,13 @@ gevent
 opencv-python
 numpy
 av
+spacy
+nltk
+scikit-learn
+PyPDF2
+matplotlib
+language_tool_python
+torch
+transformers
+fasttext-wheel
+python-dotenv

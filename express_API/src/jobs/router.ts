@@ -358,4 +358,72 @@ jobRoutes.get('/:jobID', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /job/questions:
+ *   post:
+ *     summary: Add interview questions for a job.
+ *     tags: [Job]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               jobID:
+ *                 type: string
+ *               questions:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               numberOfInterviewQuestions:
+ *                 type: integer
+ *     responses:
+ *       '200':
+ *         description: Questions added successfully
+ *       '400':
+ *         description: Bad request. Missing or invalid parameters.
+ *       '401':
+ *         description: Unauthorized. Invalid credentials.
+ *       '500':
+ *         description: Internal server error
+ */
+jobRoutes.post('/questions', requireAuth, requireCompany, async (req, res) => {
+  const companyEmail = res.locals.email;
+  const { jobID, questions, numberOfInterviewQuestions } = req.body;
+  if (!jobID) {
+    res.status(400).send('Job ID is required');
+  } else if (!questions) {
+    res.status(400).send('Questions are required');
+  } else if (!numberOfInterviewQuestions) {
+    res.status(400).send('Number of interview questions is required');
+  } else if (questions.length < numberOfInterviewQuestions) {
+    res
+      .status(400)
+      .send(
+        'Number of interview questions is greater than the number of questions',
+      );
+  } else {
+    await Job.addJobQuestion(
+      companyEmail,
+      jobID,
+      questions,
+      numberOfInterviewQuestions,
+    )
+      .then(() => {
+        res.status(200).send('Questions added successfully');
+      })
+      .catch((err) => {
+        if (err instanceof CodedError) {
+          res.status(err.code).send(err.message);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+  }
+});
+
 export default jobRoutes;

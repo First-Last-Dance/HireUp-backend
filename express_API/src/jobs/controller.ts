@@ -178,3 +178,26 @@ export async function getCompanyJobsCount(
   const companyID = await getCompanyIDByEmail(companyEmail);
   return Job.getCompanyJobsCount(companyID);
 }
+
+export async function addJobQuestion(
+  companyEmail: string,
+  jobID: string,
+  questions: Array<{ question: string; answer: string }>,
+  numberOfInterviewQuestions: number,
+): Promise<void> {
+  const job = await Job.getJobByID(jobID);
+  if (!job) {
+    throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
+  }
+  const companyID = await getCompanyIDByEmail(companyEmail);
+  if ((job.companyID as unknown as ICompany)._id !== companyID) {
+    throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
+  }
+  await Job.addQuestionsToJob(
+    jobID,
+    questions,
+    numberOfInterviewQuestions,
+  ).catch((err) => {
+    throw err;
+  });
+}

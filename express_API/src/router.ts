@@ -6,6 +6,7 @@ import skillRoutes from './skills/router';
 import jobRoutes from './jobs/router';
 import quizRoutes from './quizzes/router';
 import applicationRoutes from './applications/router';
+import topicRoutes from './topics/router';
 
 const routes = express.Router();
 
@@ -19,5 +20,6 @@ routes.use('/skill', skillRoutes);
 routes.use('/job', jobRoutes);
 routes.use('/quiz', quizRoutes);
 routes.use('/application', applicationRoutes);
+routes.use('/topic', topicRoutes);
 
 export default routes;

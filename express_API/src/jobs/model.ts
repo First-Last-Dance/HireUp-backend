@@ -1,5 +1,10 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export interface QuestionData {
+  question: string;
+  answer: string;
+}
+
 export interface JobData {
   title?: string;
   id?: string;
@@ -13,6 +18,8 @@ export interface JobData {
   interviewDeadline?: Date;
   quizRequired?: boolean;
   published?: boolean;
+  questions?: QuestionData[];
+  numberOfInterviewQuestions?: number;
 }
 export interface IJob extends Document {
   title: string;
@@ -26,6 +33,8 @@ export interface IJob extends Document {
   quizRequired: boolean;
   published: boolean;
   createdAt: Date;
+  questions?: QuestionData[];
+  numberOfInterviewQuestions?: number;
 }
 
 const jobSchema: Schema = new Schema({
@@ -43,6 +52,8 @@ const jobSchema: Schema = new Schema({
   quizRequired: { type: Boolean, required: true },
   published: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
+  questions: { type: Array },
+  numberOfInterviewQuestions: { type: Number },
 });
 
 const Job = mongoose.model<IJob>('Job', jobSchema);

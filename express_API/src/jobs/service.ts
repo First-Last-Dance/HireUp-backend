@@ -146,3 +146,20 @@ export async function getJobByID(jobID: string): Promise<IJob | null> {
       throw error;
     });
 }
+
+export async function addQuestionsToJob(
+  jobID: string,
+  question: any,
+  numberOfInterviewQuestions: number,
+): Promise<IJob | null> {
+  return JobModel.findByIdAndUpdate(
+    jobID,
+    {
+      $push: { questions: question },
+      numberOfInterviewQuestions,
+    },
+    { new: true },
+  ).catch((error) => {
+    throw error;
+  });
+}
