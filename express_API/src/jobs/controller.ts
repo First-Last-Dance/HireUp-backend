@@ -190,7 +190,11 @@ export async function addJobQuestion(
     throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
   }
   const companyID = await getCompanyIDByEmail(companyEmail);
-  if ((job.companyID as unknown as ICompany)._id !== companyID) {
+
+  if (
+    (job.companyID as unknown as ICompany)._id.toString() !==
+    companyID.toString()
+  ) {
     throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
   }
   await Job.addQuestionsToJob(

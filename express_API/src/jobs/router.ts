@@ -378,7 +378,12 @@ jobRoutes.get('/:jobID', async (req, res) => {
  *               questions:
  *                 type: array
  *                 items:
- *                   type: string
+ *                   type: object
+ *                   properties:
+ *                     question:
+ *                       type: string
+ *                     answer:
+ *                       type: string
  *               numberOfInterviewQuestions:
  *                 type: integer
  *     responses:
@@ -407,6 +412,21 @@ jobRoutes.post('/questions', requireAuth, requireCompany, async (req, res) => {
         'Number of interview questions is greater than the number of questions',
       );
   } else {
+    interface Question {
+      question: string;
+      answer: string;
+    }
+    // Validate format of each question
+    const isQuestionsFormatValid = questions.every(
+      (q: Question) =>
+        typeof q === 'object' &&
+        typeof q.question === 'string' &&
+        typeof q.answer === 'string',
+    );
+
+    if (!isQuestionsFormatValid) {
+      return res.status(400).send('Invalid format for questions');
+    }
     await Job.addJobQuestion(
       companyEmail,
       jobID,
