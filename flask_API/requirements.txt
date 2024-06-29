@@ -21,3 +21,4 @@ torch
 transformers
 fasttext-wheel
 python-dotenv
+requests
