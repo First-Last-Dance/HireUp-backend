@@ -43,21 +43,24 @@ topicRoutes.get('/names', async (req, res) => {
 
 /**
  * @swagger
- * /topic:
- *   get:
+ * /topic/questions:
+ *   post:
  *     summary: Get all given topics
  *     tags: [Topic]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: body
- *         name: topics
- *         schema:
- *           type: array
- *           items:
- *             type: string
- *         required: true
- *         description: List of topic names
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               topics:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *       description: An object with a 'topics' field that is an array of topic names.
  *     responses:
  *       200:
  *         description: List of topics data
@@ -66,28 +69,49 @@ topicRoutes.get('/names', async (req, res) => {
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/TopicData'
- *       400:
- *         description: topics parameter is required
- *       500:
- *         description: Internal Server Error
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                     description: The name of the topic.
+ *                   questions:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         question:
+ *                           type: string
+ *                           description: The question related to the topic.
+ *                         answer:
+ *                           type: string
+ *                           description: The answer to the question.
+ *                 required:
+ *                   - name
+ *                   - questions
  */
-topicRoutes.get('/', requireAuth, requireCompany, async (req, res) => {
-  try {
+topicRoutes.post(
+  '/questions',
+  requireAuth,
+  requireCompany,
+  async (req, res) => {
     const topics = req.body.topics;
     if (!topics || topics.length === 0) {
-      res.status(400).send('topics parameter is required');
+      return res.status(400).send('topics parameter is required');
     }
-    const topicsData = await Topic.getTopics(topics);
-    res.status(200).json(topicsData);
-  } catch (error) {
-    if (error instanceof CodedError) {
-      res.status(error.code).send(error.message);
-    } else {
-      res.status(500).send('Internal Server Error');
-    }
-  }
-});
+    console.log(topics);
+    Topic.getTopics(topics)
+      .then((data) => {
+        res.status(200).send(data);
+      })
+      .catch((error) => {
+        if (error instanceof CodedError) {
+          res.status(error.code).send(error.message);
+        } else {
+          res.status(500).send('Internal Server Error');
+        }
+      });
+  },
+);
 
 /**
  * @swagger
@@ -130,7 +154,7 @@ topicRoutes.post('/', requireAuth, requireAdmin, async (req, res) => {
     const topicName = req.body.name;
     const questions = req.body.questions;
     if (!topicName || !questions) {
-      res.status(400).send('name and questions parameters are required');
+      return res.status(400).send('name and questions parameters are required');
     }
     const newTopic = await Topic.addTopic(topicName, questions);
     res.status(201).json(newTopic);
