@@ -40,12 +40,15 @@ def run_socket_process(port, ApplicationID, isQuiz, questions):
     questions_json = None
     if not isQuiz:
         questions_json = json.dumps(questions)
+        
+    print(f"Running socket process on port {port} with ApplicationID {ApplicationID} and isQuiz {isQuiz}"
+          f" and questions {questions_json}")
     
     # Correctly reference the Flask app object within socket_process.py
     if isQuiz:
         command = f'python app/socket_process.py --port={port} --ApplicationID={ApplicationID} --isQuiz={isQuiz}'
     else:
-        command = f'python app/socket_process.py --port={port} --ApplicationID={ApplicationID}  --questions=\'{questions_json}\''
+        command = f'python app/socket_process.py --port={port} --ApplicationID={ApplicationID}  --questions="{questions}"'
     # Define log file path
     log_file_path = os.path.join(logs_directory, f'socket_process_{port}.log')
     with open(log_file_path, 'w') as log_file:

@@ -1,4 +1,4 @@
-import JobModel, { IJob, JobData } from './model';
+import JobModel, { IJob, JobData, QuestionData } from './model';
 
 export async function getAllJobs(): Promise<IJob[]> {
   return JobModel.find().catch((error) => {
@@ -149,13 +149,13 @@ export async function getJobByID(jobID: string): Promise<IJob | null> {
 
 export async function addQuestionsToJob(
   jobID: string,
-  question: any,
+  questions: QuestionData[],
   numberOfInterviewQuestions: number,
 ): Promise<IJob | null> {
   return JobModel.findByIdAndUpdate(
     jobID,
     {
-      $push: { questions: question },
+      questions: questions,
       numberOfInterviewQuestions,
     },
     { new: true },

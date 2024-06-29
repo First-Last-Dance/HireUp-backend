@@ -56,6 +56,8 @@ export async function startInterviewStream(
     throw new CodedError(ErrorMessage.NoQuestions, ErrorCode.NotFound);
   }
 
+  console.log('questions', questions);
+
   // invoke the python API
 
   const response = await axios.post(

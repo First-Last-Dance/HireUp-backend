@@ -423,6 +423,7 @@ jobRoutes.post('/questions', requireAuth, requireCompany, async (req, res) => {
         typeof q.question === 'string' &&
         typeof q.answer === 'string',
     );
+    console.log(questions);
 
     if (!isQuestionsFormatValid) {
       return res.status(400).send('Invalid format for questions');

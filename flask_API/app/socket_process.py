@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(description='Run a Flask socket server.')
 parser.add_argument('--port', type=int, default=5001, help='Port to run the Flask socket server on.')
 parser.add_argument('--ApplicationID', type=str, required=True, help='Application ID to name the video file.')
 parser.add_argument('--isQuiz', type=bool, default=False, help='Flag to determine the directory for saving the video (quiz_video if true, else interview_video).')
-parser.add_argument('--questions', type=str, default='[]', help='JSON string of questions for the quiz.')  # Add questions argument
+parser.add_argument('--questions', type=str, default='[]', help='JSON string of questions for the interview.')  # Add questions argument
 
 args = parser.parse_args()
 
@@ -22,14 +22,30 @@ print(args.isQuiz)
 question_counter = 0
 video_writer = None
 
-# Deserialize the JSON string of questions
-question_answer_list = json.loads(args.questions)  # Use the deserialized list
+print(f'Running socket process on port {args.port} with ApplicationID {args.ApplicationID} and isQuiz {args.isQuiz} and questions {args.questions}')
 
-# Create a list of questions from the question-answer pairs
-question_list = [qa['question'] for qa in question_answer_list]
+try:
+    question_answer_list = json.loads(args.questions.replace("'", '"'))  # Use the deserialized list
+except json.JSONDecodeError:
+    print("Error decoding JSON from provided questions argument.")
+    question_answer_list = []
+    exit(1)
 
-# create a list of answers from the question-answer pairs
-answer_list = [qa['answer'] for qa in question_answer_list]
+# Initialize empty lists to hold questions and answers
+question_list = []
+answer_list = []
+
+# Safely extract questions and answers, handling missing keys
+for qa in question_answer_list:
+    question = qa.get('question')
+    answer = qa.get('answer')
+    if question is not None and answer is not None:
+        question_list.append(question)
+        answer_list.append(answer)
+    else:
+        print("Missing 'question' or 'answer' in one of the items.")
+
+# question_list = ["What is your name?", "What is your age?", "What is your favorite color?"]
 
 def get_next_question():
     if question_list:
