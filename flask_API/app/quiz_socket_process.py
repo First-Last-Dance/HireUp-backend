@@ -21,7 +21,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 VIDEO_OUTPUT_DIR = 'quiz_video'
 video_writer = None
 
-print(f'Running quiz socket process on port {args.port} with ApplicationID {args.ApplicationID} and questions {args.questions}')
+print(f'Running quiz socket process on port {args.port} with ApplicationID {args.ApplicationID}')
 
 @socketio.on('connect')
 def handle_connect():
@@ -34,7 +34,7 @@ def handle_video_chunk(chunk):
         if video_writer is None:
             # Create a writable stream for the video file
             os.makedirs(VIDEO_OUTPUT_DIR, exist_ok=True)
-            video_file_name = f'{args.ApplicationID}_{question_counter}.webm'
+            video_file_name = f'{args.ApplicationID}.webm'
             video_output_path = os.path.join(VIDEO_OUTPUT_DIR, video_file_name)
             video_writer = open(video_output_path, 'ab')  # Open in append binary mode
         
