@@ -671,6 +671,66 @@ applicationRoutes.get(
 
 /**
  * @swagger
+ * /application/{applicationID}/startQuizStream:
+ *   get:
+ *     summary: Starts a quiz stream for a given application.
+ *     description: Initiates the quiz streaming process for the applicant associated with the given application ID.
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the application to start the quiz stream for.
+ *     responses:
+ *       200:
+ *         description: Quiz stream started successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ip_address:
+ *                   type: string
+ *                   example: "192.168.55.1"
+ *                 port:
+ *                   type: integer
+ *                   example: 5003
+ *       400:
+ *         description: Bad request. Possible reason could be missing or invalid application ID.
+ *       401:
+ *         description: Authorization information is missing or invalid.
+ *       500:
+ *         description: Internal server error.
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [Application]
+ */
+
+applicationRoutes.get(
+  '/:applicationID/startQuizStream',
+  requireAuth,
+  requireApplicant,
+  (req, res) => {
+    const applicantEmail = res.locals.email;
+    const applicationID = req.params.applicationID;
+    pythonAPI
+      .startQuizStream(applicantEmail, applicationID)
+      .then((result) => {
+        res.status(200).send(result);
+      })
+      .catch((err) => {
+        if (err instanceof CodedError) {
+          res.status(err.code).send(err.message);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+  },
+);
+
+/**
+ * @swagger
  * /application/{applicationID}/quizCalibration:
  *   post:
  *     summary: Submits calibration images for a quiz.

@@ -63,10 +63,47 @@ export async function startInterviewStream(
   const response = await axios.post(
     process.env.Python_Host + '/interview_stream',
     {
-      ApplicationID: applicantID, // Assuming you expect 'title' in the request body
+      ApplicationID: applicationID,
       Questions: questions,
     },
   );
+  return response.data;
+}
+
+export async function startQuizStream(
+  applicantEmail: string,
+  applicationID: string,
+) {
+  // Get applicant ID
+  const applicantID = await Applicant.getApplicantIDByEmail(applicantEmail);
+  if (!applicantID) {
+    throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
+  }
+
+  // Get application
+  const application = await Application.getApplicationByID(applicationID);
+
+  if (!application) {
+    throw new CodedError(ErrorMessage.ApplicationNotFound, ErrorCode.NotFound);
+  }
+
+  // Check if the applicant is the owner of the application
+  if (application.applicantID.toString() !== applicantID.toString()) {
+    throw new CodedError(
+      ErrorMessage.ApplicantIsNotTheOwnerOfTheApplication,
+      ErrorCode.Forbidden,
+    );
+  }
+
+  // Check if the application is in the right state
+  if (application.status !== 'Online Quiz') {
+    throw new CodedError(ErrorMessage.IncorrectStep, ErrorCode.Conflict);
+  }
+
+  // Invoke the python API
+  const response = await axios.post(process.env.Python_Host + '/quiz_stream', {
+    ApplicationID: applicationID,
+  });
   return response.data;
 }
 

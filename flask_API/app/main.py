@@ -10,16 +10,21 @@ import json
 
 app = Quart(__name__)
 PORT_START = 5001  # Starting port for new socket processes
-active_ports = set()  # To keep track of active ports
 
 def find_free_port(start):
-    """Find an available port starting from the given start."""
-    port = start
-    while port in active_ports:
-        port += 1
-    return port
+    """Find an available port starting from the given start without depending on a counter."""
+    for port in range(start, 65535):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(("", port))
+                # If bind is successful, return the port
+                return port
+            except OSError:
+                # If bind fails, OSError is raised, indicating the port is in use
+                continue
+    raise Exception("No free port found")
 
-def run_socket_process(port, ApplicationID, isQuiz, questions):
+def run_socket_process(port, ApplicationID, isQuiz, questions = None):
     """Run the socket process with the given port and log the output."""
     # Ensure the current directory (project root) is in the PYTHONPATH
     env = os.environ.copy()
@@ -46,9 +51,9 @@ def run_socket_process(port, ApplicationID, isQuiz, questions):
     
     # Correctly reference the Flask app object within socket_process.py
     if isQuiz:
-        command = f'python app/socket_process.py --port={port} --ApplicationID={ApplicationID} --isQuiz={isQuiz}'
+        command = f'python app/quiz_socket_process.py --port={port} --ApplicationID={ApplicationID}'
     else:
-        command = f'python app/socket_process.py --port={port} --ApplicationID={ApplicationID}  --questions="{questions}"'
+        command = f'python app/interview_socket_process.py --port={port} --ApplicationID={ApplicationID}  --questions="{questions}"'
     # Define log file path
     log_file_path = os.path.join(logs_directory, f'socket_process_{port}.log')
     with open(log_file_path, 'w') as log_file:
@@ -103,7 +108,6 @@ async def interview_new_socket():
         return jsonify({'error': 'ApplicationID is required'}), 400
     port = find_free_port(PORT_START)
     run_socket_process(port, application_id, is_quiz, questions)
-    active_ports.add(port)
     ip_address = socket.gethostbyname(socket.gethostname())
     return jsonify({'ip_address': ip_address, 'port': port})
 
@@ -118,7 +122,6 @@ async def quiz_new_socket():
         return jsonify({'error': 'ApplicationID is required'}), 400
     port = find_free_port(PORT_START)
     run_socket_process(port, application_id, is_quiz)
-    active_ports.add(port)
     ip_address = socket.gethostbyname(socket.gethostname())
     return jsonify({'ip_address': ip_address, 'port': port})
 

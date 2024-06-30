@@ -22,3 +22,12 @@ transformers
 fasttext-wheel
 python-dotenv
 requests
+moviepy
+pywin32
+mediapipe
+ffmpeg-python
+pydub
+torchaudio
+IPython
+scikit-image
+librosa

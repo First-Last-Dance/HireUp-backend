@@ -3,12 +3,15 @@ from flask_socketio import SocketIO
 import os
 import argparse
 import json  # Import json module
+import sys
+import subprocess
+
+
 
 # Set up argument parsing
 parser = argparse.ArgumentParser(description='Run a Flask socket server.')
 parser.add_argument('--port', type=int, default=5001, help='Port to run the Flask socket server on.')
 parser.add_argument('--ApplicationID', type=str, required=True, help='Application ID to name the video file.')
-parser.add_argument('--isQuiz', type=bool, default=False, help='Flag to determine the directory for saving the video (quiz_video if true, else interview_video).')
 parser.add_argument('--questions', type=str, default='[]', help='JSON string of questions for the interview.')  # Add questions argument
 
 args = parser.parse_args()
@@ -16,13 +19,11 @@ args = parser.parse_args()
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-VIDEO_OUTPUT_DIR = 'quiz_video' if args.isQuiz else 'interview_video'
-print(VIDEO_OUTPUT_DIR)
-print(args.isQuiz)
+VIDEO_OUTPUT_DIR = 'interview_video'
 question_counter = 0
 video_writer = None
 
-print(f'Running socket process on port {args.port} with ApplicationID {args.ApplicationID} and isQuiz {args.isQuiz} and questions {args.questions}')
+print(f'Running interview socket process on port {args.port} with ApplicationID {args.ApplicationID} and questions {args.questions}')
 
 try:
     question_answer_list = json.loads(args.questions.replace("'", '"'))  # Use the deserialized list
@@ -88,15 +89,25 @@ def handle_video_chunk(chunk):
     except Exception as e:
         print(f'Error processing video chunk: {e}')
 
+def finalize_video(file_name):
+    input_path = os.path.join(VIDEO_OUTPUT_DIR, file_name)
+    output_path = os.path.join(VIDEO_OUTPUT_DIR, f'final_{file_name}')
+    command = f'ffmpeg -i {input_path} -c copy {output_path} -y'
+    subprocess.run(command, shell=True, check=True)
+    os.remove(input_path)  # Remove the original corrupted file
+    os.rename(output_path, input_path)  # Rename the finalized file to the original name
+    
 @socketio.on('nextQuestion')
 def handle_next_question():
     global video_writer
     # Save the video file when the client requests the next question
     if video_writer:
         video_writer.close()
+        finalize_video(f'{args.ApplicationID}_{question_counter}.webm')
         print(f'Video file saved')
         video_writer = None
     send_question()
+    
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -105,12 +116,25 @@ def handle_disconnect():
     if video_writer:
         # Close the video writer when the client disconnects
         video_writer.close()
+        finalize_video(f'{args.ApplicationID}_{question_counter}.webm')
         print(f'Video file saved')
         video_writer = None
         
-    # Run the interview process
-    command = f'python app/models/HireUp_Interview/Interview.py --videoPath={video_output_path} --topLeftImagePath=top_left.png --topRightImagePath=top_right.png --bottomRightImagePath=bottom_right.png --bottomLeftImagePath=bottom_left.png --correctAnswers="{answer_list}"'
-    
+    # Run the interview process for each question
+    for i in range(question_counter):
+        video_file_name = f'{args.ApplicationID}_{i+1}.webm'
+        video_output_path = os.path.join(VIDEO_OUTPUT_DIR, video_file_name)
+        command = f'{sys.executable} models/HireUp_Interview/Interview.py --videoPath={video_output_path} --upLeftImagePath=interview_calibration/{args.ApplicationID}_UpLeft.png --upRightImagePath=interview_calibration/{args.ApplicationID}_UpRight.png --downRightImagePath=interview_calibration/{args.ApplicationID}_DownRight.png --downLeftImagePath=interview_calibration/{args.ApplicationID}_DownLeft.png --correctAnswer="{answer_list[i]}"'        
+        
+        process = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        # Get the standard output and error
+        stdout = process.stdout.decode()
+        stderr = process.stderr.decode()
+
+        # Optionally, print them
+        print("STDOUT:", stdout)
+        print("STDERR:", stderr)
 
 if __name__ == '__main__':
     socketio.run(app, port=args.port)
