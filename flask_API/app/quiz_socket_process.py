@@ -68,7 +68,7 @@ def handle_disconnect():
     # Run the quiz process
         video_file_name = f'{args.ApplicationID}.webm'
         video_output_path = os.path.join(VIDEO_OUTPUT_DIR, video_file_name)
-        command = f'{sys.executable} models/HireUp_quiz/Quiz.py --videoPath={video_output_path} --upLeftImagePath=quiz_calibration/{args.ApplicationID}_UpLeft.png --upRightImagePath=quiz_calibration/{args.ApplicationID}_UpRight.png --downRightImagePath=quiz_calibration/{args.ApplicationID}_DownRight.png --downLeftImagePath=quiz_calibration/{args.ApplicationID}_DownLeft.png'        
+        command = f'{sys.executable} models/HireUp_interview/Quiz.py --videoPath={video_output_path} --upLeftImagePath=quiz_calibration/{args.ApplicationID}_UpLeft.png --upRightImagePath=quiz_calibration/{args.ApplicationID}_UpRight.png --downRightImagePath=quiz_calibration/{args.ApplicationID}_DownRight.png --downLeftImagePath=quiz_calibration/{args.ApplicationID}_DownLeft.png'        
         
         process = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
