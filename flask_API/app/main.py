@@ -30,11 +30,6 @@ def run_socket_process(port, ApplicationID, isQuiz, questions = None):
     env = os.environ.copy()
     current_directory = os.getcwd()
     env['PYTHONPATH'] = current_directory
-    print("---------------------------Here---------------------------")
-    print(current_directory)
-    # Check if socket_process.py exists in the current directory
-    if not os.path.exists(os.path.join(current_directory, 'app/socket_process.py')):
-        raise FileNotFoundError("The module 'socket_process.py' was not found in the current directory.")
     
     # Ensure the logs directory exists
     logs_directory = os.path.join(current_directory, 'logs')
