@@ -2,11 +2,13 @@ import { CodedError, ErrorCode, ErrorMessage } from '../util/error';
 import { ApplicationData } from './model';
 import * as Application from './service';
 import * as Applicant from '../applicants/service';
+import { getApplicantByID } from '../applicants/controller';
 import { getCompanyIDByEmail } from '../companies/controller';
 import * as Job from '../jobs/service';
 import { ICompany } from '../companies/model';
 import * as Quiz from '../quizzes/service';
 import { QuizData } from '../quizzes/model';
+import { ApplicantData } from '../applicants/model';
 
 export async function updateApplicationStatus(
   applicationId: string,
@@ -419,4 +421,111 @@ export async function submitQuiz(
   );
 
   return result >= passRatio;
+}
+
+export async function getApplicationsByJobIDAndStatus(
+  jobID: string,
+  status: string,
+  companyEmail: string,
+  limit: number,
+  page: number,
+): Promise<ApplicationData[]> {
+  // Check if the job belongs to the company
+  const companyID = await getCompanyIDByEmail(companyEmail);
+  const job = await Job.getJobByID(jobID);
+  if (!job) {
+    throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
+  }
+  if (
+    (job.companyID as unknown as ICompany)._id.toString() !==
+    companyID.toString()
+  ) {
+    throw new CodedError(
+      ErrorMessage.JobIsNotOwnedByThisCompany,
+      ErrorCode.Forbidden,
+    );
+  }
+
+  const companyName = (job.companyID as unknown as ICompany).name;
+  const title = job.title;
+  const applications = await Application.getApplicationsByJobIDAndStatus(
+    jobID,
+    status,
+    limit,
+    page,
+  ).catch((err) => {
+    throw err;
+  });
+  const applicationsArr: ApplicationData[] = [];
+  applications.forEach((application) => {
+    applicationsArr.push({
+      applicationID: application._id,
+      status: application.status,
+      applicantID: application.applicantID as unknown as string,
+      jobID: application.jobID as unknown as string,
+      companyName: companyName,
+      title: title,
+      steps: application.steps,
+    });
+  });
+  return applicationsArr;
+}
+
+export function getApplicationsCountByJobIDAndStatus(
+  jobID: string,
+  status: string,
+): Promise<number> {
+  return Application.getApplicationsCountByJobIDAndStatus(jobID, status);
+}
+
+export async function getApplicationDetails(
+  applicationID: string,
+  companyEmail: string,
+): Promise<{ applicant: ApplicantData; application: ApplicationData }> {
+  const application = await Application.getApplicationByID(applicationID).catch(
+    (err) => {
+      throw err;
+    },
+  );
+  if (!application) {
+    throw new CodedError(ErrorMessage.ApplicationNotFound, ErrorCode.NotFound);
+  }
+  const job = await Job.getJobByID(application.jobID as unknown as string);
+  if (!job) {
+    throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
+  }
+  const companyName = (job.companyID as unknown as ICompany).name;
+  // Get the company ID from the company email
+  const companyID = await getCompanyIDByEmail(companyEmail);
+  // Check if the company is the owner of the job
+  if (
+    (job.companyID as unknown as ICompany)._id.toString() !==
+    companyID.toString()
+  ) {
+    throw new CodedError(
+      ErrorMessage.JobIsNotOwnedByThisCompany,
+      ErrorCode.Forbidden,
+    );
+  }
+  const title = job.title;
+  // Get applicant Name
+  const applicant = await getApplicantByID(
+    application.applicantID as unknown as string,
+  ).catch((err) => {
+    throw err;
+  });
+  if (!applicant) {
+    throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
+  }
+  const retrievedApplication: ApplicationData = {
+    applicantName: `${applicant.firstName} ${applicant.lastName}`,
+    applicationID: application._id,
+    status: application.status,
+    applicantID: application.applicantID as unknown as string,
+    jobID: application.jobID as unknown as string,
+    companyName: companyName,
+    title: title,
+    steps: application.steps,
+  };
+  return { applicant: applicant, application: retrievedApplication };
 }

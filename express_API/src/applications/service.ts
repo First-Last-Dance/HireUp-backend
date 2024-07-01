@@ -154,3 +154,31 @@ export async function updateQuizDeadline(
     throw error;
   });
 }
+
+export async function getApplicationsByJobIDAndStatus(
+  jobID: string,
+  status: string,
+  limit: number,
+  page: number,
+): Promise<IApplication[]> {
+  return ApplicationModel.find({ jobID, status })
+    .sort({
+      s: -1,
+    })
+    .limit(limit)
+    .skip(limit * (page - 1))
+    .catch((error) => {
+      throw error;
+    });
+}
+
+export async function getApplicationsCountByJobIDAndStatus(
+  applicantID: string,
+  status: string,
+): Promise<number> {
+  return ApplicationModel.countDocuments({ applicantID, status }).catch(
+    (error) => {
+      throw error;
+    },
+  );
+}

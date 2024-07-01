@@ -202,3 +202,15 @@ export async function getApplicantIDByEmail(email: string): Promise<string> {
   }
   return applicant._id;
 }
+
+export async function getApplicantByID(
+  applicantID: string,
+): Promise<IApplicant> {
+  const applicant = await ApplicantModel.findById(applicantID).catch((err) => {
+    throw err;
+  });
+  if (!applicant) {
+    throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
+  }
+  return applicant;
+}

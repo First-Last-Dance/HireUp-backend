@@ -138,3 +138,28 @@ export async function updateApplicantSkills(
     throw err;
   });
 }
+
+export async function getApplicantByID(id: string): Promise<ApplicantData> {
+  const data: ApplicantData = {};
+  const skillsNames: string[] = [];
+  await Applicant.getApplicantByID(id)
+    .then(async (res) => {
+      data.email = res.email;
+      data.firstName = res.firstName;
+      data.middleName = res.middleName;
+      data.lastName = res.lastName;
+      data.phoneNumber = res.phoneNumber;
+      data.nationalIDNumber = res.nationalIDNumber;
+      data.profilePhoto = res.profilePhoto;
+      data.nationalIDPhotoFace = res.nationalIDPhotoFace;
+      data.nationalIDPhotoBack = res.nationalIDPhotoBack;
+      res.skills.forEach((skill) => {
+        skillsNames.push((skill as unknown as ISkill).name);
+      });
+      data.skills = skillsNames;
+    })
+    .catch((err) => {
+      throw err;
+    });
+  return data;
+}

@@ -3,15 +3,31 @@ import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
+export interface EmotionData {
+  emotion?: string;
+  ratio?: number;
+}
+
+export interface InterviewQuestionData {
+  questionCheating?: number;
+  questionFaceSpeechCheating?: number;
+  questionSimilarity?: number;
+  questionEmotions?: EmotionData[];
+}
+
 // Interface representing the structure of data for an application
 export interface ApplicationData {
   applicantID?: string;
+  applicantName?: string;
   jobID?: string;
   status?: string;
   applicationID?: string;
   companyName?: string;
   title?: string;
   steps?: string[];
+  quizEyeCheating?: number;
+  quizFaceSpeechCheating?: number;
+  interviewQuestionsData?: InterviewQuestionData[];
 }
 
 // Interface representing a mongoose document for an applicant
@@ -23,6 +39,9 @@ export interface IApplication extends mongoose.Document {
   createdAt: Date;
   quizDeadline?: Date;
   interviewDeadline?: Date;
+  quizEyeCheating?: number;
+  quizFaceSpeechCheating?: number;
+  interviewQuestionsData?: InterviewQuestionData[];
 }
 
 // Define the schema for the application collection
@@ -38,6 +57,21 @@ const applicationSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
   quizDeadline: { type: Date },
   interviewDeadline: { type: Date },
+  quizEyeCheating: { type: Number },
+  quizFaceSpeechCheating: { type: Number },
+  interviewQuestionsData: [
+    {
+      questionCheating: { type: Number },
+      questionFaceSpeechCheating: { type: Number },
+      questionSimilarity: { type: Number },
+      questionEmotions: [
+        {
+          emotion: { type: String },
+          ratio: { type: Number },
+        },
+      ],
+    },
+  ],
 });
 
 // Create a mongoose model based on the schema

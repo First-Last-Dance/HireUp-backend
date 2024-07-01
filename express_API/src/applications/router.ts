@@ -959,6 +959,313 @@ applicationRoutes.post(
   },
 );
 
+/**
+ * @swagger
+ * /application/getFinishedApplicationsByJobId/{jobID}:
+ *   get:
+ *     summary: Get all finished applications of a job by job ID with pagination
+ *     tags: [Application]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobID
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the job
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         required: true
+ *         description: The number of items to return per page
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         required: true
+ *         description: The page number to return
+ *     responses:
+ *       200:
+ *         description: An array of application documents with pagination details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 previous:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                 next:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                 applications:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       applicantID:
+ *                         type: string
+ *                       applicantName:
+ *                         type: string
+ *                       jobID:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                       applicationID:
+ *                         type: string
+ *                       companyName:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       steps:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       quizEyeCheating:
+ *                         type: number
+ *                       quizFaceSpeechCheating:
+ *                         type: number
+ *                       interviewQuestionsData:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             questionCheating:
+ *                               type: number
+ *                             questionFaceSpeechCheating:
+ *                               type: number
+ *                             questionSimilarity:
+ *                               type: number
+ *                             questionEmotions:
+ *                               type: array
+ *                               items:
+ *                                 type: object
+ *                                 properties:
+ *                                   emotion:
+ *                                     type: string
+ *                                   ratio:
+ *                                     type: number
+ *                 pages:
+ *                   type: object
+ *                   properties:
+ *                     count:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *       400:
+ *         description: Bad request, required parameters are missing
+ *       500:
+ *         description: Internal server error
+ */
+
+applicationRoutes.get(
+  '/getFinishedApplicationsByJobId/:jobID',
+  requireAuth,
+  requireCompany,
+  async (req, res) => {
+    const jobID = req.params.jobID;
+    const companyEmail = res.locals.email;
+    if (!jobID) {
+      return res.status(400).send('jobID is required');
+    }
+    const { limit, page } = req.query;
+    if (!limit) {
+      res.status(400).send('Limit is required');
+    } else if (!page) {
+      res.status(400).send('Page is required');
+    } else {
+      const startIndex =
+        (parseInt(page as string) - 1) * parseInt(limit as string);
+      const endIndex = parseInt(page as string) * parseInt(limit as string);
+      const numberOfApplications =
+        await Application.getApplicationsCountByJobIDAndStatus(
+          jobID as unknown as string,
+          'Final Result',
+        );
+      const pagesCount = Math.ceil(
+        numberOfApplications / parseInt(limit as string),
+      );
+
+      await Application.getApplicationsByJobIDAndStatus(
+        jobID as string,
+        'Final Result',
+        companyEmail,
+        parseInt(limit as string),
+        parseInt(page as string),
+      )
+        .then(async (applications) => {
+          const results: {
+            previous?: { page: number; limit: number };
+            next?: { page: number; limit: number };
+            applications: ApplicationData[];
+            pages: { count: number; limit: number };
+          } = {
+            applications: applications,
+            pages: { count: pagesCount, limit: parseInt(limit as string) },
+          };
+          if (endIndex < numberOfApplications) {
+            results.next = {
+              page: parseInt(page as string) + 1,
+              limit: parseInt(limit as string),
+            };
+          }
+          if (startIndex > 0) {
+            results.previous = {
+              page: parseInt(page as string) - 1,
+              limit: parseInt(limit as string),
+            };
+          }
+          res.status(200).send(results);
+        })
+        .catch((err) => {
+          if (err instanceof CodedError) {
+            res.status(err.code).send(err.message);
+          } else {
+            res.status(500).send(err);
+          }
+        });
+    }
+  },
+);
+
+/**
+ * /application/{applicationID}/details:
+ *   get:
+ *     summary: Get details of a specific application by application ID
+ *     tags: [Application]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the application
+ *     responses:
+ *       200:
+ *         description: The details of the application
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 applicant:
+ *                   type: object
+ *                   properties:
+ *                     email:
+ *                       type: string
+ *                     firstName:
+ *                       type: string
+ *                     middleName:
+ *                       type: string
+ *                     lastName:
+ *                       type: string
+ *                     phoneNumber:
+ *                       type: string
+ *                     nationalIDNumber:
+ *                       type: string
+ *                     profilePhoto:
+ *                       type: string
+ *                     nationalIDPhotoFace:
+ *                       type: string
+ *                     nationalIDPhotoBack:
+ *                       type: string
+ *                     skills:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                 application:
+ *                   type: object
+ *                   properties:
+ *                     applicantID:
+ *                       type: string
+ *                     applicantName:
+ *                       type: string
+ *                     jobID:
+ *                       type: string
+ *                     status:
+ *                       type: string
+ *                     applicationID:
+ *                       type: string
+ *                     companyName:
+ *                       type: string
+ *                     title:
+ *                       type: string
+ *                     steps:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                     quizEyeCheating:
+ *                       type: number
+ *                     quizFaceSpeechCheating:
+ *                       type: number
+ *                     interviewQuestionsData:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           questionCheating:
+ *                             type: number
+ *                           questionFaceSpeechCheating:
+ *                             type: number
+ *                           questionSimilarity:
+ *                             type: number
+ *                           questionEmotions:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 emotion:
+ *                                   type: string
+ *                                 ratio:
+ *                                   type: number
+ *       400:
+ *         description: Bad request, required parameters are missing
+ *       500:
+ *         description: Internal server error
+ */
+
+applicationRoutes.get(
+  '/:applicationID/details',
+  requireAuth,
+  requireCompany,
+  async (req, res) => {
+    const applicationID = req.params.applicationID;
+    const companyEmail = res.locals.email;
+    if (!applicationID) {
+      return res.status(400).send('applicationID is required');
+    }
+
+    await Application.getApplicationDetails(
+      applicationID as string,
+      companyEmail,
+    )
+      .then(async (result) => {
+        res.status(200).send(result);
+      })
+      .catch((err) => {
+        if (err instanceof CodedError) {
+          res.status(err.code).send(err.message);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+  },
+);
+
 // Error handling middleware
 applicationRoutes.use(
   (
