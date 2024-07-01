@@ -60,7 +60,7 @@ def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, b
             
         cheatingRate = lip_movements.cheatingRate(frames)
         overAllCheatingRate += cheatingRate
-    speakingCheatingRate = overAllCheatingRate / len(intervals)
+    speakingCheatingRate = overAllCheatingRate / max(len(intervals), 1)
     video.close()
     
     return eyeCheatingRate, speakingCheatingRate

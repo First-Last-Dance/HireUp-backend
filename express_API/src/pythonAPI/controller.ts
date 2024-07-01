@@ -67,6 +67,16 @@ export async function startInterviewStream(
       Questions: questions,
     },
   );
+  if (!response.data) {
+    throw new CodedError(ErrorMessage.InternalServerError, ErrorCode.NotFound);
+  }
+
+  await Application.updateApplicationStatus(
+    applicationID,
+    'Final Result',
+  ).catch((err) => {
+    throw err;
+  });
   return response.data;
 }
 

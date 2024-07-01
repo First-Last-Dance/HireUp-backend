@@ -5,11 +5,11 @@ const { Schema } = mongoose;
 
 export interface EmotionData {
   emotion?: string;
-  ratio?: number;
+  percentage?: number;
 }
 
 export interface InterviewQuestionData {
-  questionCheating?: number;
+  questionEyeCheating?: number;
   questionFaceSpeechCheating?: number;
   questionSimilarity?: number;
   questionEmotions?: EmotionData[];
@@ -67,7 +67,7 @@ const applicationSchema = new Schema({
       questionEmotions: [
         {
           emotion: { type: String },
-          ratio: { type: Number },
+          percentage: { type: Number },
         },
       ],
     },

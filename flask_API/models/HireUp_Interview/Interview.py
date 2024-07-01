@@ -1,3 +1,6 @@
+import time
+
+import requests
 from Quiz import Quiz
 from sklearn.metrics.pairwise import cosine_similarity
 from transformers import AutoTokenizer, AutoModel
@@ -13,6 +16,10 @@ import wave
 import shutil
 import argparse
 import ffmpeg
+import logging
+
+from dotenv import load_dotenv
+
 
 import speech_recognition as sr
 
@@ -20,20 +27,30 @@ import speech_recognition as sr
 def combine_wav_files(input_folder, output_file):
     wav_files = [f for f in os.listdir(input_folder) if f.endswith('.wav')]
     combined_frames = []
+    params = None  # Initialize params to None
 
-    # Read each wav file and append its frames
-    for wav_file in wav_files:
-        file_path = os.path.join(input_folder, wav_file)
-        with wave.open(file_path, 'rb') as wf:
-            params = wf.getparams()
-            frames = wf.readframes(params.nframes)
-            combined_frames.append(frames)
-
-    # Write the combined frames to the output file
+    # Initialize the output file with default parameters in case no valid WAV files are found
     with wave.open(output_file, 'wb') as wf:
-        wf.setparams(params)
-        for frames in combined_frames:
-            wf.writeframes(frames)
+        if wav_files:
+            for wav_file in wav_files:
+                file_path = os.path.join(input_folder, wav_file)
+                with wave.open(file_path, 'rb') as wf_read:
+                    if not params:
+                        params = wf_read.getparams()
+                        wf.setparams(params)
+                    frames = wf_read.readframes(params.nframes)
+                    combined_frames.append(frames)
+
+            if combined_frames:
+                for frames in combined_frames:
+                    wf.writeframes(frames)
+            else:
+                logging.warning("No frames were combined. Creating an empty WAV file.")
+                # If no frames were combined, the file is already created but empty
+        else:
+            logging.warning("No WAV files found in the input folder. Creating an empty WAV file.")
+            # Set default parameters for the empty WAV file
+            wf.setparams((1, 2, 16000, 0, 'NONE', 'not compressed'))
 
 
 # Mean Pooling - Take attention mask into account for correct averaging
@@ -147,6 +164,57 @@ def Interview(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePa
     return eyeCheatingRate, speakingCheatingRate, similarity, emotion_percentages
 
 
+def wait_for_express_server():
+    while True:
+        try:
+            # Get the address of the Express server from the environment variable
+            express_server_address = os.getenv('EXPRESS_SERVER_ADDRESS', 'http://localhost:3000')
+            # Send a GET request to the Express server
+            response = requests.get(express_server_address)
+            if response.status_code == 200:
+                print("Express server started.")
+                break
+        except requests.exceptions.ConnectionError:
+            pass
+        print("Waiting for the Express server to start...")
+        time.sleep(1)
+        
+def login():
+    # Get the address of the Express server from the environment variable
+    express_server_address = os.getenv('EXPRESS_SERVER_ADDRESS', 'http://localhost:3000')
+    # Get the login credentials from the environment variables
+    email = os.getenv('EXPRESS_SERVER_EMAIL', 'email@example.com')
+    password = os.getenv('EXPRESS_SERVER_PASSWORD', 'password')
+    # Send a POST request to the Express server to login
+    response = requests.post(f"{express_server_address}/account/logIn", json={"email": email, "password": password})
+    if response.status_code == 200:
+        print("Login successful.")
+        return response.json().get('token')
+    else:
+        print("Login failed.")
+        
+def send_interview_question_data(applicationID, questionEyeCheating, questionFaceSpeechCheating, questionSimilarity, questionEmotions, token):
+    # Get the address of the Express server from the environment variable
+    express_server_address = os.getenv('EXPRESS_SERVER_ADDRESS', 'http://localhost:3000')
+      # Convert numpy.float32 to float
+    questionEyeCheating = float(questionEyeCheating) if isinstance(questionEyeCheating, np.float32) else questionEyeCheating
+    questionFaceSpeechCheating = float(questionFaceSpeechCheating) if isinstance(questionFaceSpeechCheating, np.float32) else questionFaceSpeechCheating
+    questionSimilarity = float(questionSimilarity) if isinstance(questionSimilarity, np.float32) else questionSimilarity
+    # Add dummy data for questionEmotions if it is None or empty
+    questionEmotions = questionEmotions or {"angry": 0.0, "happy": 0.0, "sad": 0.0, "neutral": 0.0}
+    # Convert numpy.float32 values in emotion_percentages to Python floats for serialization
+    emotion_percentages_serializable = {emotion: float(percentage) for emotion, percentage in questionEmotions.items()}
+    # Convert it to a list of objects
+    emotion_percentages_serializable = [{"emotion": emotion, "percentage": percentage} for emotion, percentage in emotion_percentages_serializable.items()]
+    # Send a POST request to the Express server to add the topic
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.post(f"{express_server_address}/application/{applicationID}/interviewQuestionData", json={"questionEyeCheating": questionEyeCheating, "questionFaceSpeechCheating": questionFaceSpeechCheating, "questionSimilarity": questionSimilarity,  "questionEmotions": emotion_percentages_serializable}, headers=headers)
+    if response.status_code == 200:
+        print(f"Interview Question Data added successfully.")
+    else:
+        print(response)
+        print(f"Failed to add Interview Question Data.")
+        
 def main():
     parser = argparse.ArgumentParser(description="Run the Interview process.")
     parser.add_argument("--videoPath", required=True, help="Path to the video file")
@@ -155,6 +223,7 @@ def main():
     parser.add_argument("--downRightImagePath", required=True, help="Path to the bottom right image file")
     parser.add_argument("--downLeftImagePath", required=True, help="Path to the bottom left image file")
     parser.add_argument("--correctAnswer", required=True, help="Correct answers for the interview questions")
+    parser.add_argument("--applicationID", required=True, help="Application ID")
 
     args = parser.parse_args()
     print("Arguments: ", args)
@@ -162,7 +231,15 @@ def main():
     # Call the Interview function with the parsed arguments
     results = Interview(args.videoPath, args.upLeftImagePath, args.upRightImagePath, args.downRightImagePath, args.downLeftImagePath, args.correctAnswer)
     
-    print(results)
+    # Load environment variables from .env file
+    load_dotenv()
+    
+    wait_for_express_server()
+    token = login()
+    
+    # Send the interview question data to the Express server
+    send_interview_question_data(args.applicationID, results[0], results[1], results[2], results[3], token)
+    
 
 if __name__ == "__main__":
     main()

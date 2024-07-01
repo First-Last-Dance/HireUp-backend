@@ -1,5 +1,5 @@
 import { CodedError, ErrorCode, ErrorMessage } from '../util/error';
-import { ApplicationData } from './model';
+import { ApplicationData, InterviewQuestionData } from './model';
 import * as Application from './service';
 import * as Applicant from '../applicants/service';
 import { getApplicantByID } from '../applicants/controller';
@@ -190,8 +190,15 @@ export async function getApplicationsByJobID(
     throw err;
   });
   const applicationsArr: ApplicationData[] = [];
-  applications.forEach((application) => {
+  for (const application of applications) {
+    const applicant = await Applicant.getApplicantByID(
+      application.applicantID as unknown as string,
+    );
+    if (!applicant) {
+      throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
+    }
     applicationsArr.push({
+      applicantName: applicant.firstName + ' ' + applicant.lastName,
       applicationID: application._id,
       status: application.status,
       applicantID: application.applicantID as unknown as string,
@@ -200,7 +207,7 @@ export async function getApplicationsByJobID(
       title: title,
       steps: application.steps,
     });
-  });
+  }
   return applicationsArr;
 }
 
@@ -457,8 +464,15 @@ export async function getApplicationsByJobIDAndStatus(
     throw err;
   });
   const applicationsArr: ApplicationData[] = [];
-  applications.forEach((application) => {
+  for (const application of applications) {
+    const applicant = await Applicant.getApplicantByID(
+      application.applicantID as unknown as string,
+    );
+    if (!applicant) {
+      throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
+    }
     applicationsArr.push({
+      applicantName: applicant.firstName + ' ' + applicant.lastName,
       applicationID: application._id,
       status: application.status,
       applicantID: application.applicantID as unknown as string,
@@ -467,7 +481,7 @@ export async function getApplicationsByJobIDAndStatus(
       title: title,
       steps: application.steps,
     });
-  });
+  }
   return applicationsArr;
 }
 
@@ -528,4 +542,38 @@ export async function getApplicationDetails(
     steps: application.steps,
   };
   return { applicant: applicant, application: retrievedApplication };
+}
+
+export async function addQuizCheatingData(
+  applicationID: string,
+  quizEyeCheating: number,
+  quizFaceSpeechCheating: number,
+): Promise<void> {
+  await Application.addQuizCheatingData(
+    applicationID,
+    quizEyeCheating,
+    quizFaceSpeechCheating,
+  ).catch((err) => {
+    throw err;
+  });
+}
+
+export async function addInterviewQuestionData(
+  applicationID: string,
+  questionEyeCheating: number,
+  questionFaceSpeechCheating: number,
+  questionSimilarity: number,
+  questionEmotions: any[],
+): Promise<void> {
+  const questionData: InterviewQuestionData = {
+    questionEyeCheating,
+    questionFaceSpeechCheating,
+    questionSimilarity,
+    questionEmotions,
+  };
+  await Application.addInterviewQuestionData(applicationID, questionData).catch(
+    (err) => {
+      throw err;
+    },
+  );
 }

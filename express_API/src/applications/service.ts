@@ -1,6 +1,10 @@
 // application.service.ts
 
-import ApplicationModel, { IApplication, ApplicationData } from './model';
+import ApplicationModel, {
+  IApplication,
+  ApplicationData,
+  InterviewQuestionData,
+} from './model';
 
 /**
  * Update status of an application by application ID
@@ -182,3 +186,28 @@ export async function getApplicationsCountByJobIDAndStatus(
     },
   );
 }
+
+export async function addQuizCheatingData(
+  applicationID: string,
+  quizEyeCheating: number,
+  quizFaceSpeechCheating: number,
+): Promise<void> {
+  await ApplicationModel.findByIdAndUpdate(applicationID, {
+    quizEyeCheating,
+    quizFaceSpeechCheating,
+  }).catch((error) => {
+    throw error;
+  });
+}
+
+export async function addInterviewQuestionData(
+  applicationID: string,
+  interviewQuestionData: InterviewQuestionData,
+): Promise<void> {
+  await ApplicationModel.findByIdAndUpdate(applicationID, {
+    $push: { interviewQuestionsData: interviewQuestionData },
+  }).catch((error) => {
+    throw error;
+  });
+}
+

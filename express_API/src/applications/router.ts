@@ -1,6 +1,7 @@
 import express, { application } from 'express';
 import * as Application from './controller';
 import {
+  requireAdmin,
   requireApplicant,
   requireAuth,
   requireCompany,
@@ -1263,6 +1264,158 @@ applicationRoutes.get(
           res.status(500).send(err);
         }
       });
+  },
+);
+
+/**
+ *  /application/{applicationID}/quizCheatingData:
+ *   post:
+ *     summary: Add quiz cheating data for a specific application
+ *     tags: [Application]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the application
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               quizEyeCheating:
+ *                 type: number
+ *               quizFaceSpeechCheating:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Quiz cheating data updated successfully
+ *       400:
+ *         description: Bad request, required parameters are missing
+ *       500:
+ *         description: Internal server error
+ *
+ */
+
+applicationRoutes.post(
+  '/:applicationID/quizCheatingData',
+  requireAuth,
+  requireAdmin,
+  async (req, res) => {
+    const applicationID = req.params.applicationID;
+    const { quizEyeCheating, quizFaceSpeechCheating } = req.body;
+    if (!quizEyeCheating || !quizFaceSpeechCheating) {
+      return res
+        .status(400)
+        .send('Both quizEyeCheating and quizFaceSpeechCheating are required');
+    }
+    try {
+      await Application.addQuizCheatingData(
+        applicationID,
+        quizEyeCheating,
+        quizFaceSpeechCheating,
+      );
+      res.status(200).send('Quiz cheating data updated successfully');
+    } catch (err) {
+      if (err instanceof CodedError) {
+        res.status(err.code).send(err.message);
+      } else {
+        res.status(500).send(err);
+      }
+    }
+  },
+);
+
+/**
+ * /application/{applicationID}/interviewQuestionData:
+ *   post:
+ *     summary: Add interview question data for a specific application
+ *     tags: [Application]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the application
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               questionEyeCheating:
+ *                 type: number
+ *               questionFaceSpeechCheating:
+ *                 type: number
+ *               questionSimilarity:
+ *                 type: number
+ *               questionEmotions:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     emotion:
+ *                       type: string
+ *                     ratio:
+ *                       type: number
+ *     responses:
+ *       200:
+ *         description: Interview question data updated successfully
+ *       400:
+ *         description: Bad request, required parameters are missing
+ *       500:
+ *         description: Internal server error
+ */
+
+applicationRoutes.post(
+  '/:applicationID/interviewQuestionData',
+  requireAuth,
+  requireAdmin,
+  async (req, res) => {
+    const applicationID = req.params.applicationID;
+    const {
+      questionEyeCheating,
+      questionFaceSpeechCheating,
+      questionSimilarity,
+      questionEmotions,
+    } = req.body;
+    if (
+      typeof questionEyeCheating === 'undefined' ||
+      typeof questionFaceSpeechCheating === 'undefined' ||
+      typeof questionSimilarity === 'undefined' ||
+      typeof questionEmotions === 'undefined'
+    ) {
+      return res
+        .status(400)
+        .send(
+          'All questionEyeCheating, questionFaceSpeechCheating, questionSimilarity, and questionEmotions are required',
+        );
+    }
+    try {
+      await Application.addInterviewQuestionData(
+        applicationID,
+        questionEyeCheating,
+        questionFaceSpeechCheating,
+        questionSimilarity,
+        questionEmotions,
+      );
+      res.status(200).send('Interview question data updated successfully');
+    } catch (err) {
+      if (err instanceof CodedError) {
+        res.status(err.code).send(err.message);
+      } else {
+        res.status(500).send(err);
+      }
+    }
   },
 );
 
