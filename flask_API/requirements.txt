@@ -31,3 +31,4 @@ torchaudio
 IPython
 scikit-image
 librosa
+speech_recognition

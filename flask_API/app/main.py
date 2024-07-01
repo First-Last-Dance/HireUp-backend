@@ -9,20 +9,13 @@ import json
 
 
 app = Quart(__name__)
-PORT_START = 5001  # Starting port for new socket processes
 
-def find_free_port(start):
-    """Find an available port starting from the given start without depending on a counter."""
-    for port in range(start, 65535):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                s.bind(("", port))
-                # If bind is successful, return the port
-                return port
-            except OSError:
-                # If bind fails, OSError is raised, indicating the port is in use
-                continue
-    raise Exception("No free port found")
+def find_free_port():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(('', 0))
+    port = s.getsockname()[1]
+    s.close()
+    return port
 
 def run_socket_process(port, ApplicationID, isQuiz, questions = None):
     """Run the socket process with the given port and log the output."""
@@ -93,7 +86,6 @@ def save_calibration_images(pictureUpRight, pictureUpLeft, pictureDownRight, pic
 
 @app.route('/interview_stream', methods=['POST'])
 async def interview_new_socket():
-    global PORT_START
     # Extract ApplicationID from the request body
     data = await request.get_json()  # Await the JSON data
     application_id = data.get('ApplicationID')
@@ -101,21 +93,20 @@ async def interview_new_socket():
     is_quiz = False
     if not application_id:
         return jsonify({'error': 'ApplicationID is required'}), 400
-    port = find_free_port(PORT_START)
+    port = find_free_port()
     run_socket_process(port, application_id, is_quiz, questions)
     ip_address = socket.gethostbyname(socket.gethostname())
     return jsonify({'ip_address': ip_address, 'port': port})
 
 @app.route('/quiz_stream', methods=['POST'])
 async def quiz_new_socket():
-    global PORT_START
     # Extract ApplicationID from the request body
     data = await request.get_json()
     application_id = data.get('ApplicationID')
     is_quiz = True
     if not application_id:
         return jsonify({'error': 'ApplicationID is required'}), 400
-    port = find_free_port(PORT_START)
+    port = find_free_port()
     run_socket_process(port, application_id, is_quiz)
     ip_address = socket.gethostbyname(socket.gethostname())
     return jsonify({'ip_address': ip_address, 'port': port})
