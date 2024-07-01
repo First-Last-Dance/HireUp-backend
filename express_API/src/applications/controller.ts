@@ -169,7 +169,10 @@ export async function getApplicationsByJobID(
   if (!job) {
     throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
   }
-  if ((job.companyID as unknown as ICompany)._id !== companyID) {
+  if (
+    (job.companyID as unknown as ICompany)._id.toString() !==
+    companyID.toString()
+  ) {
     throw new CodedError(
       ErrorMessage.JobIsNotOwnedByThisCompany,
       ErrorCode.Forbidden,
