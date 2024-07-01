@@ -135,6 +135,8 @@ def handle_disconnect():
         # Optionally, print them
         print("STDOUT:", stdout)
         print("STDERR:", stderr)
+    exit(0)
+    
 
 if __name__ == '__main__':
     socketio.run(app, port=args.port)

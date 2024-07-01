@@ -120,19 +120,6 @@ async def quiz_new_socket():
     ip_address = socket.gethostbyname(socket.gethostname())
     return jsonify({'ip_address': ip_address, 'port': port})
 
-@app.route('/stop_stream', methods=['POST'])
-async def stop_socket():
-    data = await request.get_json()
-    port = data.get('port')
-    if not port:
-        return jsonify({'error': 'Port is required'}), 400
-    if port not in active_ports:
-        return jsonify({'error': 'Port is not active'}), 400
-    # Kill the socket process
-    subprocess.run(f'kill -9 $(lsof -t -i:{port})', shell=True)
-    active_ports.remove(port)
-    return jsonify({'message': 'Socket process stopped'})
-
 
 @app.route('/quiz_calibration', methods=['POST'])
 async def quiz_save_calibration():
