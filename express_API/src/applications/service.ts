@@ -103,7 +103,7 @@ export async function getApplicationsByApplicantId(
       applicantID: applicantId,
     })
       .sort({
-        averageSimilarity: -1,
+        createdAt: -1,
       })
       .limit(limit)
       .skip(limit * (page - 1));
