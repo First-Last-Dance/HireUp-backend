@@ -124,7 +124,7 @@ def handle_disconnect():
     for i in range(question_counter):
         video_file_name = f'{args.ApplicationID}_{i+1}.webm'
         video_output_path = os.path.join(VIDEO_OUTPUT_DIR, video_file_name)
-        command = f'{sys.executable} models/HireUp_Interview/Interview.py --videoPath={video_output_path} --upLeftImagePath=interview_calibration/{args.ApplicationID}_UpLeft.png --upRightImagePath=interview_calibration/{args.ApplicationID}_UpRight.png --downRightImagePath=interview_calibration/{args.ApplicationID}_DownRight.png --downLeftImagePath=interview_calibration/{args.ApplicationID}_DownLeft.png --correctAnswer="{answer_list[i]}" --applicationID={args.ApplicationID}'        
+        command = f'"{sys.executable}" models/HireUp_Interview/Interview.py --videoPath={video_output_path} --upLeftImagePath=interview_calibration/{args.ApplicationID}_UpLeft.png --upRightImagePath=interview_calibration/{args.ApplicationID}_UpRight.png --downRightImagePath=interview_calibration/{args.ApplicationID}_DownRight.png --downLeftImagePath=interview_calibration/{args.ApplicationID}_DownLeft.png --correctAnswer="{answer_list[i]}" --applicationID={args.ApplicationID}'        
         
         process = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
