@@ -412,7 +412,7 @@ export async function submitQuiz(
   // Check if the applicant passed the quiz
 
   const totalScore = quiz.questions.reduce(
-    (acc, question) => acc + (question.score || 1),
+    (acc, question) => acc + (Number(question.score) || 1),
     0,
   );
 
