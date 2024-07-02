@@ -1,5 +1,6 @@
 // application.service.ts
 
+import { CodedError, ErrorCode, ErrorMessage } from '../util/error';
 import ApplicationModel, {
   IApplication,
   ApplicationData,
@@ -102,7 +103,7 @@ export async function getApplicationsByApplicantId(
       applicantID: applicantId,
     })
       .sort({
-        createdAt: -1,
+        averageSimilarity: -1,
       })
       .limit(limit)
       .skip(limit * (page - 1));
@@ -167,7 +168,7 @@ export async function getApplicationsByJobIDAndStatus(
 ): Promise<IApplication[]> {
   return ApplicationModel.find({ jobID, status })
     .sort({
-      s: -1,
+      averageSimilarity: -1,
     })
     .limit(limit)
     .skip(limit * (page - 1))
@@ -204,10 +205,51 @@ export async function addInterviewQuestionData(
   applicationID: string,
   interviewQuestionData: InterviewQuestionData,
 ): Promise<void> {
+  const application = await ApplicationModel.findById(applicationID).catch(
+    (error) => {
+      throw error;
+    },
+  );
+  if (!application) {
+    throw new Error('Application not found');
+  }
+  if (!application.totalSimilarity) {
+    application.totalSimilarity = 0;
+  }
+  if (!application.questionsCount) {
+    application.questionsCount = 0;
+  }
+  if (!application.interviewQuestionsData) {
+    throw new CodedError(
+      ErrorMessage.interviewQuestionDataIsNotAvailable,
+      ErrorCode.NotFound,
+    );
+  }
+  if (!interviewQuestionData.questionSimilarity) {
+    interviewQuestionData.questionSimilarity = 0;
+  }
+  // Calculate the new total and count
+  const newTotal =
+    application.totalSimilarity + interviewQuestionData.questionSimilarity;
+  const newCount = application.questionsCount + 1;
+  const newAverage = newTotal / newCount;
   await ApplicationModel.findByIdAndUpdate(applicationID, {
     $push: { interviewQuestionsData: interviewQuestionData },
+    totalSimilarity: newTotal,
+    questionsCount: newCount,
+    averageSimilarity: newAverage,
   }).catch((error) => {
     throw error;
   });
 }
 
+export async function updateQuizScore(
+  applicationID: string,
+  quizScore: number,
+): Promise<void> {
+  await ApplicationModel.findByIdAndUpdate(applicationID, {
+    quizScore,
+  }).catch((error) => {
+    throw error;
+  });
+}

@@ -206,6 +206,7 @@ export async function getApplicationsByJobID(
       companyName: companyName,
       title: title,
       steps: application.steps,
+      averageSimilarity: application.averageSimilarity,
     });
   }
   return applicationsArr;
@@ -427,6 +428,11 @@ export async function submitQuiz(
     },
   );
 
+  // Update the quiz score
+  await Application.updateQuizScore(applicationID, score).catch((err) => {
+    throw err;
+  });
+
   return result >= passRatio;
 }
 
@@ -480,6 +486,7 @@ export async function getApplicationsByJobIDAndStatus(
       companyName: companyName,
       title: title,
       steps: application.steps,
+      averageSimilarity: application.averageSimilarity,
     });
   }
   return applicationsArr;
@@ -543,6 +550,8 @@ export async function getApplicationDetails(
     quizEyeCheating: application.quizEyeCheating,
     quizFaceSpeechCheating: application.quizFaceSpeechCheating,
     interviewQuestionsData: application.interviewQuestionsData,
+    quizScore: application.quizScore,
+    averageSimilarity: application.averageSimilarity,
   };
   return { applicant: applicant, application: retrievedApplication };
 }

@@ -8,6 +8,7 @@ export class CodedError extends Error {
 }
 // message enum
 export enum ErrorMessage {
+  interviewQuestionDataIsNotAvailable = 'interview question data is not available',
   TopicAlreadyExists = 'Topic already exists',
   TopicNotFound = 'Topic not found',
   IncorrectStep = 'Incorrect step',

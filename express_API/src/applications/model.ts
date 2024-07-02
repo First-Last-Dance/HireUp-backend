@@ -27,7 +27,11 @@ export interface ApplicationData {
   steps?: string[];
   quizEyeCheating?: number;
   quizFaceSpeechCheating?: number;
+  quizScore?: number;
   interviewQuestionsData?: InterviewQuestionData[];
+  averageSimilarity?: number;
+  totalSimilarity?: number;
+  questionsCount?: number;
 }
 
 // Interface representing a mongoose document for an applicant
@@ -42,6 +46,10 @@ export interface IApplication extends mongoose.Document {
   quizEyeCheating?: number;
   quizFaceSpeechCheating?: number;
   interviewQuestionsData?: InterviewQuestionData[];
+  quizScore?: number;
+  averageSimilarity?: number;
+  totalSimilarity?: number;
+  questionsCount?: number;
 }
 
 // Define the schema for the application collection
@@ -72,6 +80,10 @@ const applicationSchema = new Schema({
       ],
     },
   ],
+  quizScore: { type: Number },
+  averageSimilarity: { type: Number },
+  totalSimilarity: { type: Number },
+  questionsCount: { type: Number },
 });
 
 // Create a mongoose model based on the schema
