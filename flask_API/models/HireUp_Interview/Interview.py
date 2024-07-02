@@ -11,7 +11,7 @@ import librosa
 import numpy as np
 import joblib
 import os
-from Quiz import audioOutput
+# from Quiz import audioOutput
 import wave
 import shutil
 import argparse
@@ -124,6 +124,7 @@ def getSimilarity(applicantAnswers, correctAnswers):
     return similarity
 
 def Interview(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, bottomLeftImagePath, correctAnswers):
+    audioOutput = os.path.splitext(videoPath)[0] + '.wav'
     # Extract the audio from the video
     if os.path.isfile(audioOutput):
         os.remove(audioOutput)
@@ -142,7 +143,7 @@ def Interview(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePa
         print(f"Could not request results from Google Speech Recognition service; {e}")
         applicantAnswers = ""
     
-    eyeCheatingRate, speakingCheatingRate = Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, bottomLeftImagePath)
+    eyeCheatingRate, speakingCheatingRate = Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, bottomLeftImagePath, audioOutput)
     
     similarity = getSimilarity(applicantAnswers, correctAnswers)
     
@@ -152,14 +153,14 @@ def Interview(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePa
     output_folder = os.path.splitext(audioOutput)[0]
     
     # Can change the path of the combined audio file
-    combined_audio_file = 'combined_audio.wav'
+    combined_audio_file = output_folder + '_combined.wav'
     
     combine_wav_files(output_folder, combined_audio_file)
     
     _, emotion_percentages = classify_audio(combined_audio_file, svm_model)
         
-    shutil.rmtree(output_folder)
-    os.remove(combined_audio_file)
+    # shutil.rmtree(output_folder)
+    # os.remove(combined_audio_file)
     
     return eyeCheatingRate, speakingCheatingRate, similarity, emotion_percentages
 
