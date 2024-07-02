@@ -1142,6 +1142,7 @@ applicationRoutes.get(
 );
 
 /**
+ * @swagger
  * /application/{applicationID}/details:
  *   get:
  *     summary: Get details of a specific application by application ID
@@ -1268,6 +1269,7 @@ applicationRoutes.get(
 );
 
 /**
+ * @swagger
  *  /application/{applicationID}/quizCheatingData:
  *   post:
  *     summary: Add quiz cheating data for a specific application
@@ -1332,6 +1334,7 @@ applicationRoutes.post(
 );
 
 /**
+ * @swagger
  * /application/{applicationID}/interviewQuestionData:
  *   post:
  *     summary: Add interview question data for a specific application

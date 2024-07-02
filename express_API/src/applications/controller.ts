@@ -540,6 +540,9 @@ export async function getApplicationDetails(
     companyName: companyName,
     title: title,
     steps: application.steps,
+    quizEyeCheating: application.quizEyeCheating,
+    quizFaceSpeechCheating: application.quizFaceSpeechCheating,
+    interviewQuestionsData: application.interviewQuestionsData,
   };
   return { applicant: applicant, application: retrievedApplication };
 }
