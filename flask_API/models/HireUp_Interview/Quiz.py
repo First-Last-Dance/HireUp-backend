@@ -1,3 +1,4 @@
+import time
 from moviepy.editor import VideoFileClip
 import cv2
 import matplotlib.pyplot as plt
