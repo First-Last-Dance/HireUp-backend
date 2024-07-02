@@ -111,12 +111,12 @@ def send_quiz_cheating_data(applicationID, eyeCheatingRate, speakingCheatingRate
 
     # Send a POST request to the Express server to add the topic
     headers = {"Authorization": f"Bearer {token}"}
-    response = requests.post(f"{express_server_address}/application/{applicationID}/quizCheatingData", json={"quizEyeCheating": eyeCheatingRate}, headers=headers)
+    response = requests.post(f"{express_server_address}/application/{applicationID}/quizCheatingData", json={"quizEyeCheating": eyeCheatingRate, 'quizFaceSpeechCheating': speakingCheatingRate}, headers=headers)
     if response.status_code == 200:
-        print(f"Interview Question Data added successfully.")
+        print(f"Quiz Cheating Data added successfully.")
     else:
         print(response)
-        print(f"Failed to add Interview Question Data.")
+        print(f"Failed to add Quiz Cheating Data.")
 
 def main():
     parser = argparse.ArgumentParser(description='Process video for cheating detection.')
@@ -125,6 +125,7 @@ def main():
     parser.add_argument('--upRightImagePath', required=True, help='Path to the up right image file')
     parser.add_argument('--downRightImagePath', required=True, help='Path to the down right image file')
     parser.add_argument('--downLeftImagePath', required=True, help='Path to the down left image file')
+    parser.add_argument("--applicationID", required=True, help="Application ID")
 
     args = parser.parse_args()
 
@@ -138,6 +139,8 @@ def main():
     
     wait_for_express_server()
     token = login()
+    print(token)
+    print(args.applicationID)
     
     # Send the interview question data to the Express server
     send_quiz_cheating_data(args.applicationID,eyeCheatingRate, speakingCheatingRate, token)

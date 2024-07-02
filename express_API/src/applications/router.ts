@@ -1311,7 +1311,13 @@ applicationRoutes.post(
   async (req, res) => {
     const applicationID = req.params.applicationID;
     const { quizEyeCheating, quizFaceSpeechCheating } = req.body;
-    if (!quizEyeCheating || !quizFaceSpeechCheating) {
+
+    if (
+      quizEyeCheating === undefined ||
+      quizEyeCheating === null ||
+      quizFaceSpeechCheating === undefined ||
+      quizFaceSpeechCheating === null
+    ) {
       return res
         .status(400)
         .send('Both quizEyeCheating and quizFaceSpeechCheating are required');
@@ -1393,9 +1399,13 @@ applicationRoutes.post(
     } = req.body;
     if (
       typeof questionEyeCheating === 'undefined' ||
+      questionEyeCheating === null ||
       typeof questionFaceSpeechCheating === 'undefined' ||
+      questionFaceSpeechCheating === null ||
       typeof questionSimilarity === 'undefined' ||
-      typeof questionEmotions === 'undefined'
+      questionSimilarity === null ||
+      typeof questionEmotions === 'undefined' ||
+      questionEmotions === null
     ) {
       return res
         .status(400)
