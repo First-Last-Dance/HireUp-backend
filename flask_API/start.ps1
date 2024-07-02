@@ -35,8 +35,8 @@ function Is-VenvDirectoryPresent {
 # Function to install dependencies if needed
 function Install-Dependencies {
     Write-Host "Installing dependencies..."
-    pip install -r requirements.txt --quiet --ignore-installed
-    python -m spacy download en_core_web_sm --quiet
+    pip install -r requirements.txt --ignore-installed
+    python -m spacy download en_core_web_sm
 }
 
 # Function to check if all dependencies from requirements.txt are installed
@@ -94,7 +94,6 @@ if (-not (Are-DependenciesInstalled)) {
 if (-not (Is-EnvFilePresent)) {
     Write-Host "Creating .env file..."
     New-Item -ItemType File -Path .env
-    Add-Content -Path .env -Value "DATABASE_URL=sqlite:///./test.db"
     Add-Content -Path .env -Value "EXPRESS_SERVER_ADDRESS= http://localhost:3000"
     Add-Content -Path .env -Value "EXPRESS_SERVER_EMAIL = email@example.com"
     Add-Content -Path .env -Value "EXPRESS_SERVER_PASSWORD = password"

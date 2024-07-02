@@ -5,7 +5,7 @@ param (
 # Function to start the Express API in the background
 function Start-Express-Api-Bg {
     Write-Host "Starting Express API in the background..."
-    Start-Process -NoNewWindow -FilePath "powershell" -ArgumentList "-Command", "cd express_API; npm start"
+    Start-Process -NoNewWindow -FilePath "powershell" -ArgumentList "-Command", "cd express_API; npm install; npm start"
 }
 
 # Function to start the Flask API in the background
