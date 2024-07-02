@@ -63,6 +63,7 @@ def mean_pooling(model_output, attention_mask):
 def split_audio(file_path, segment_length=4):
     y, sr = librosa.load(file_path, sr=None)
     total_duration = librosa.get_duration(y=y, sr=sr)
+    segment_length = min(segment_length, total_duration)
     segments = []
     for start in np.arange(0, total_duration, segment_length):
         end = start + segment_length
