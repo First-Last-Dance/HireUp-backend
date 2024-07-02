@@ -58,6 +58,7 @@ def finalize_video(file_name):
 def handle_disconnect():
     global video_writer
     print('Client disconnected')
+    quiz_process_run = False  # Initialize the flag to False
     if video_writer:
         # Close the video writer when the client disconnects
         video_writer.close()
@@ -65,12 +66,16 @@ def handle_disconnect():
         print(f'Video file saved')
         video_writer = None
         
+        env = os.environ.copy()
+        current_directory = os.getcwd()
+        env['PYTHONPATH'] = current_directory
+        
     # Run the quiz process
         video_file_name = f'{args.ApplicationID}.webm'
         video_output_path = os.path.join(VIDEO_OUTPUT_DIR, video_file_name)
-        command = f'"{sys.executable}" models/HireUp_interview/Quiz.py --videoPath={video_output_path} --upLeftImagePath=quiz_calibration/{args.ApplicationID}_UpLeft.png --upRightImagePath=quiz_calibration/{args.ApplicationID}_UpRight.png --downRightImagePath=quiz_calibration/{args.ApplicationID}_DownRight.png --downLeftImagePath=quiz_calibration/{args.ApplicationID}_DownLeft.png'        
+        command = f'python models/HireUp_interview/Quiz.py --videoPath={video_output_path} --upLeftImagePath=quiz_calibration/{args.ApplicationID}_UpLeft.png --upRightImagePath=quiz_calibration/{args.ApplicationID}_UpRight.png --downRightImagePath=quiz_calibration/{args.ApplicationID}_DownRight.png --downLeftImagePath=quiz_calibration/{args.ApplicationID}_DownLeft.png'        
         
-        process = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.run(command, shell=True, env=env, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # Get the standard output and error
         stdout = process.stdout.decode()
@@ -79,7 +84,16 @@ def handle_disconnect():
         # Optionally, print them
         print("STDOUT:", stdout)
         print("STDERR:", stderr)
-    exit(0)
+        
+        quiz_process_run = True  # Set the flag to True after running the quiz process
+
+    # Conditional exit based on the flag
+    if quiz_process_run:
+        print("Exiting after running the quiz process.")
+        exit(0)
+    else:
+        print("Quiz process did not run. Exiting without running the quiz process.")
+        exit(1)
     
 if __name__ == '__main__':
     socketio.run(app, port=args.port)
