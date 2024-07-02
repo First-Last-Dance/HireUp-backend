@@ -20,7 +20,8 @@ from dotenv import load_dotenv
 # so you can change it to any path or make the function get intervals without make an audio file
 # audioOutput = 'audio.wav'
 
-def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, bottomLeftImagePath, audioOutput):
+def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, bottomLeftImagePath):
+    audioOutput = os.path.splitext(videoPath)[0] + '.wav'
     
     eyeCheatingRate = 0
     speakingCheatingRate = 0
