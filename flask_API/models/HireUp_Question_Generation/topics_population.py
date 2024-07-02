@@ -18,7 +18,7 @@ def myScore(template):
 def generate_questions(folderPath='', numberOfTopics=10, numberOfDocuments=3, numberOfSentences=1, topQuestions=1, text='', isText=False):
     try:
         sentences, paragraphs = summarization(numberOfTopics, numberOfDocuments, numberOfSentences, folderPath=folderPath, text=text, isText=isText)
-        unigram, bigram, trigram, wordCount, questionTemplates, answerTemplates, questionGaurds, answerGaurds, questionWordCount, questionCount = QG.loadModel('models\HireUp_Question_Generation\Trained_Model')
+        unigram, bigram, trigram, wordCount, questionTemplates, answerTemplates, questionGaurds, answerGaurds, questionWordCount, questionCount = QG.loadModel('models\HireUp_Question_Generation\Trained_Model_Dev')
         normalized_path = os.path.normpath(folderPath)
         folder_name = os.path.basename(normalized_path)
         result = {
