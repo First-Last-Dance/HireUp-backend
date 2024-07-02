@@ -69,7 +69,7 @@ const applicationSchema = new Schema({
   quizFaceSpeechCheating: { type: Number },
   interviewQuestionsData: [
     {
-      questionCheating: { type: Number },
+      questionEyeCheating: { type: Number },
       questionFaceSpeechCheating: { type: Number },
       questionSimilarity: { type: Number },
       questionEmotions: [

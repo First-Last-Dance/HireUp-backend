@@ -429,7 +429,7 @@ export async function submitQuiz(
   );
 
   // Update the quiz score
-  await Application.updateQuizScore(applicationID, score).catch((err) => {
+  await Application.updateQuizScore(applicationID, result).catch((err) => {
     throw err;
   });
 
