@@ -59,10 +59,10 @@ def get_next_question():
 
 def send_question():
     global question_counter
-    question_counter += 1
     question = get_next_question()
     if question:
         socketio.emit('question', question)
+        question_counter += 1
     else:
         socketio.emit('end')
 
