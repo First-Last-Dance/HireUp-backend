@@ -206,9 +206,14 @@ export async function getApplicantIDByEmail(email: string): Promise<string> {
 export async function getApplicantByID(
   applicantID: string,
 ): Promise<IApplicant> {
-  const applicant = await ApplicantModel.findById(applicantID).catch((err) => {
-    throw err;
-  });
+  const applicant = await ApplicantModel.findById(applicantID)
+    .populate({
+      path: 'skills',
+      select: 'name -_id',
+    })
+    .catch((err) => {
+      throw err;
+    });
   if (!applicant) {
     throw new CodedError(ErrorMessage.AccountNotFound, ErrorCode.NotFound);
   }
