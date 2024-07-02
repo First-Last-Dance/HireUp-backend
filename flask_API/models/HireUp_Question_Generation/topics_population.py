@@ -15,7 +15,7 @@ def myScore(template):
             count += 1
     return 1 - count/len(words)
 
-def generate_questions(folderPath='', numberOfTopics=1, numberOfDocuments=3, numberOfSentences=10, topQuestions=1, text='', isText=False):
+def generate_questions(folderPath='', numberOfTopics=10, numberOfDocuments=3, numberOfSentences=1, topQuestions=1, text='', isText=False):
     try:
         sentences, paragraphs = summarization(numberOfTopics, numberOfDocuments, numberOfSentences, folderPath=folderPath, text=text, isText=isText)
         unigram, bigram, trigram, wordCount, questionTemplates, answerTemplates, questionGaurds, answerGaurds, questionWordCount, questionCount = QG.loadModel('models\HireUp_Question_Generation\Trained_Model')
