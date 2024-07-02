@@ -142,7 +142,7 @@ def Interview(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePa
         print(f"Could not request results from Google Speech Recognition service; {e}")
         applicantAnswers = ""
     
-    eyeCheatingRate, speakingCheatingRate = Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, bottomLeftImagePath, audioOutput)
+    eyeCheatingRate, speakingCheatingRate = Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, bottomLeftImagePath)
     
     similarity = getSimilarity(applicantAnswers, correctAnswers)
     
