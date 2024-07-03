@@ -170,6 +170,7 @@ def get_top_N_documents_in_top_M_topics(U, original_documents, N, M):
     top_N_document_in_top_M_topic = []
     documents_set_indeces = set()
     documents_indeces = []
+    M = min(M, U.shape[1])
     for i in range(M):
         documents = ''
         j = 1
