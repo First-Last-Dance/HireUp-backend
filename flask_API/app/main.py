@@ -47,6 +47,51 @@ def run_socket_process(port, ApplicationID, isQuiz, questions = None):
     with open(log_file_path, 'w') as log_file:
         subprocess.Popen(command, shell=True, env=env, stdout=log_file, stderr=subprocess.STDOUT)
         
+        
+def run_QG_socket_process(port):
+    """Run the socket process with the given port and log the output."""
+    # Ensure the current directory (project root) is in the PYTHONPATH
+    env = os.environ.copy()
+    current_directory = os.getcwd()
+    env['PYTHONPATH'] = current_directory
+    
+    # Ensure the logs directory exists
+    logs_directory = os.path.join(current_directory, 'logs')
+    if not os.path.exists(logs_directory):
+        os.makedirs(logs_directory)
+        
+    print(f"Running QG socket process on port {port}")
+    
+    # Correctly reference the Flask app object within socket_process.py
+    command = f'python app/QG_socket_process.py --port={port}'
+    
+    # Define log file path
+    log_file_path = os.path.join(logs_directory, f'socket_process_{port}.log')
+    with open(log_file_path, 'w') as log_file:
+        subprocess.Popen(command, shell=True, env=env, stdout=log_file, stderr=subprocess.STDOUT)
+    run_QG_client_process(port)
+        
+def run_QG_client_process(port):
+    """Run the socket process with the given port and log the output."""
+    # Ensure the current directory (project root) is in the PYTHONPATH
+    env = os.environ.copy()
+    current_directory = os.getcwd()
+    env['PYTHONPATH'] = current_directory
+    
+    # Ensure the logs directory exists
+    logs_directory = os.path.join(current_directory, 'logs')
+    if not os.path.exists(logs_directory):
+        os.makedirs(logs_directory)
+        
+    print(f"Running QG client process on port {port}")
+    
+    # Correctly reference the Flask app object within socket_process.py
+    command = f'python app/QG_client_process.py --port={port}'
+    
+    # Define log file path
+    log_file_path = os.path.join(logs_directory, f'socket_process_{port}_client.log')
+    with open(log_file_path, 'w') as log_file:
+        subprocess.Popen(command, shell=True, env=env, stdout=log_file, stderr=subprocess.STDOUT)
 
 def save_calibration_images(pictureUpRight, pictureUpLeft, pictureDownRight, pictureDownLeft, ApplicationID, isQuiz):
     # Base directory where images will be saved
@@ -108,6 +153,13 @@ async def quiz_new_socket():
         return jsonify({'error': 'ApplicationID is required'}), 400
     port = find_free_port()
     run_socket_process(port, application_id, is_quiz)
+    ip_address = socket.gethostbyname(socket.gethostname())
+    return jsonify({'ip_address': ip_address, 'port': port})
+
+@app.route('/QG_socket', methods=['POST'])
+async def QG_new_socket():
+    port = find_free_port()
+    run_QG_socket_process(port)
     ip_address = socket.gethostbyname(socket.gethostname())
     return jsonify({'ip_address': ip_address, 'port': port})
 

@@ -44,6 +44,8 @@ def generate_questions(folderPath='', numberOfTopics=10, numberOfDocuments=3, nu
             questionsWithScore.sort(key=lambda x: (x[2], x[3]), reverse=True)
             length = min(topQuestions, len(questionsWithScore))
             for i in range(length):
+                print(questionsWithScore[i][0])   
+                print("Answer: ", questionsWithScore[i][1])
                 result["questions"].append({
                     "question": questionsWithScore[i][0],
                     "answer": sentence
@@ -143,4 +145,5 @@ def main(base_directory, processed_file):
 # Usage example
 base_directory = 'topics_data'
 processed_file = 'topics.txt'
-main(base_directory, processed_file)
+if __name__ == "__main__":
+    main(base_directory, processed_file)

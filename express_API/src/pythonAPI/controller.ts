@@ -210,3 +210,12 @@ export async function interviewCalibration(
     });
   return response.data;
 }
+
+export async function startQGSocket() {
+  // invoke the python API
+  const response = await axios.post(process.env.Python_Host + '/QG_socket');
+  if (!response.data) {
+    throw new CodedError(ErrorMessage.InternalServerError, ErrorCode.NotFound);
+  }
+  return response.data;
+}

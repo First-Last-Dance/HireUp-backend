@@ -3,6 +3,7 @@ import * as Job from './controller';
 import { requireAuth, requireCompany } from '../util/authentication';
 import { CodedError } from '../util/error';
 import { JobData } from './model';
+import * as pythonAPI from '../pythonAPI/controller';
 
 const jobRoutes = express.Router();
 
@@ -107,6 +108,51 @@ jobRoutes.post('/addJob', requireAuth, requireCompany, async (req, res) => {
         }
       });
   }
+});
+
+/**
+ * @swagger
+ * /job/QG:
+ *   get:
+ *     summary: Start the Question Generation Socket.
+ *     tags: [Job]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Question Generation Socket started successfully. Returns the IP address and port.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ip_address:
+ *                   type: string
+ *                   example: "192.168.55.1"
+ *                 port:
+ *                   type: integer
+ *                   example: 5003
+ *       '400':
+ *         description: Bad request. Missing or invalid parameters.
+ *       '401':
+ *         description: Unauthorized. Invalid credentials.
+ *       '500':
+ *         description: Internal server error
+ */
+
+jobRoutes.get('/QG', requireAuth, requireCompany, async (req, res) => {
+  await pythonAPI
+    .startQGSocket()
+    .then((response) => {
+      res.status(200).send(response);
+    })
+    .catch((err) => {
+      if (err instanceof CodedError) {
+        res.status(err.code).send(err.message);
+      } else {
+        res.status(500).send(err);
+      }
+    });
 });
 
 /**

@@ -3,7 +3,6 @@ from flask_socketio import SocketIO
 import os
 import argparse
 import json  # Import json module
-import sys
 import subprocess
 
 

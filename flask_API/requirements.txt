@@ -32,3 +32,4 @@ IPython
 scikit-image
 librosa
 SpeechRecognition
+websocket-client
