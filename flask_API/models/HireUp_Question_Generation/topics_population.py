@@ -15,10 +15,10 @@ def myScore(template):
             count += 1
     return 1 - count/len(words)
 
-def generate_questions(folderPath='', numberOfTopics=10, numberOfDocuments=3, numberOfSentences=1, topQuestions=1, text='', isText=False):
+def generate_questions(folderPath='', numberOfTopics=10, numberOfDocuments=3, numberOfSentences=1, topQuestions=10, text='', isText=False):
     try:
         sentences, paragraphs = summarization(numberOfTopics, numberOfDocuments, numberOfSentences, folderPath=folderPath, text=text, isText=isText)
-        unigram, bigram, trigram, wordCount, questionTemplates, answerTemplates, questionGaurds, answerGaurds, questionWordCount, questionCount = QG.loadModel('models\HireUp_Question_Generation\Trained_Model_Dev')
+        unigram, bigram, trigram, wordCount, questionTemplates, answerTemplates, questionGaurds, answerGaurds, questionWordCount, questionCount = QG.loadModel('models\\HireUp_Question_Generation\\Trained_Model_Dev')
         normalized_path = os.path.normpath(folderPath)
         folder_name = os.path.basename(normalized_path)
         result = {
@@ -43,11 +43,15 @@ def generate_questions(folderPath='', numberOfTopics=10, numberOfDocuments=3, nu
 
             questionsWithScore.sort(key=lambda x: (x[2], x[3]), reverse=True)
             length = min(topQuestions, len(questionsWithScore))
+            question_list = []
             for i in range(length):
                 print(questionsWithScore[i][0])   
                 print("Answer: ", questionsWithScore[i][1])
+                question_list.append(questionsWithScore[i][0])
+            
+            if question_list:
                 result["questions"].append({
-                    "question": questionsWithScore[i][0],
+                    "question": question_list,
                     "answer": sentence
                 })
         

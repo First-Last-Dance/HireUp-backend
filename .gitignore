@@ -139,3 +139,5 @@ __pycache__/
 # virtualenv
 .venv
 venv/
+
+flask_API/topics.txt
