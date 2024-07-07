@@ -1,5 +1,6 @@
 import express, { application } from 'express';
 import * as Application from './controller';
+import fs from 'fs';
 import {
   requireAdmin,
   requireApplicant,
@@ -10,6 +11,7 @@ import { CodedError } from '../util/error';
 import { ApplicationData } from './model';
 import * as pythonAPI from '../pythonAPI/controller';
 import multer from 'multer';
+import * as dotenv from 'dotenv';
 
 const applicationRoutes = express.Router();
 
@@ -1428,6 +1430,183 @@ applicationRoutes.post(
       } else {
         res.status(500).send(err);
       }
+    }
+  },
+);
+
+// Config the .env file
+dotenv.config();
+
+/**
+ * @swagger
+ * /application/{applicationID}/quizVideo:
+ *   get:
+ *     summary: Get quiz video for a specific application
+ *     tags: [Application]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the application
+ *       - in: header
+ *         name: range
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Range of bytes to fetch from the video
+ *     responses:
+ *       200:
+ *         description: Video fetched successfully
+ *       206:
+ *         description: Partial content
+ *       400:
+ *         description: Bad request
+ *       416:
+ *         description: Range not satisfiable
+ *       500:
+ *         description: Internal server error
+ */
+
+applicationRoutes.get(
+  '/:applicationID/quizVideo',
+  requireAuth,
+  requireCompany,
+  (req, res) => {
+    const applicationID = req.params.applicationID;
+    const videosPath = process.env.VIDEOS_PATH;
+    const videoPath = `${videosPath}/quiz_video/${applicationID}.webm`; // Specify the exact path to the video file
+    const stat = fs.statSync(videoPath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    if (range) {
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+      if (start >= fileSize) {
+        res
+          .status(416)
+          .send(
+            'Requested range not satisfiable\n' + start + ' >= ' + fileSize,
+          );
+        return;
+      }
+
+      const chunksize = end - start + 1;
+      const file = fs.createReadStream(videoPath, { start, end });
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': 'video/mkv',
+      };
+
+      res.writeHead(206, head);
+      file.pipe(res);
+    } else {
+      const head = {
+        'Content-Length': fileSize,
+        'Content-Type': 'video/mkv',
+      };
+      res.writeHead(200, head);
+      fs.createReadStream(videoPath).pipe(res);
+    }
+  },
+);
+
+/**
+ * @swagger
+ * /application/{applicationID}/interviewVideo:
+ *   get:
+ *     summary: Get interview video for a specific application
+ *     tags: [Application]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: applicationID
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the application
+ *       - in: query
+ *         name: questionNumber
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The question number of the interview
+ *       - in: header
+ *         name: range
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Range of bytes to fetch from the video
+ *     responses:
+ *       200:
+ *         description: Video fetched successfully
+ *       206:
+ *         description: Partial content
+ *       400:
+ *         description: Bad request
+ *       416:
+ *         description: Range not satisfiable
+ *       500:
+ *         description: Internal server error
+ */
+
+applicationRoutes.get(
+  '/:applicationID/interviewVideo',
+  requireAuth,
+  requireCompany,
+  (req, res) => {
+    const applicationID = req.params.applicationID;
+    const questionNumber = req.query.questionNumber as string;
+    if (!questionNumber) {
+      return res.status(400).send('questionNumber is required');
+    }
+    const videosPath = process.env.VIDEOS_PATH;
+    const videoPath = `${videosPath}/interview_video/${applicationID}_${questionNumber}.webm`; // Specify the exact path to the video file
+    const stat = fs.statSync(videoPath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    if (range) {
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+      if (start >= fileSize) {
+        res
+          .status(416)
+          .send(
+            'Requested range not satisfiable\n' + start + ' >= ' + fileSize,
+          );
+        return;
+      }
+
+      const chunksize = end - start + 1;
+      const file = fs.createReadStream(videoPath, { start, end });
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': 'video/mkv',
+      };
+
+      res.writeHead(206, head);
+      file.pipe(res);
+    } else {
+      const head = {
+        'Content-Length': fileSize,
+        'Content-Type': 'video/mkv',
+      };
+      res.writeHead(200, head);
+      fs.createReadStream(videoPath).pipe(res);
     }
   },
 );
