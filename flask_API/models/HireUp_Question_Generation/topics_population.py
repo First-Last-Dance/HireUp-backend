@@ -7,41 +7,105 @@ import Text_Summarization
 from Text_Summarization import summarization
 
 # Define the generate_questions function as provided
-def myScore(template):
+def myScore(template, question, answer):
+    """
+    Calculate the score for a generated question-answer pair based on the template, question, and answer.
+
+    Parameters:
+    template (str): The question template.
+    question (str): The generated question.
+    answer (str): The generated answer.
+
+    Returns:
+    float: The calculated score for the question-answer pair.
+    """
+    # Remove the question mark from the question and strip leading/trailing whitespaces
+    question = question.strip('?').strip()
+    
+    # Split the template into words
     words = template.split()
+    
+    # Count the number of constant words in the template
     count = 0
     for word in words:
-        if not (word.startswith('[') and word.endswith(']')) or (word.startswith('<') and word.endswith('>')):
+        if not ((word.startswith('[') and word.endswith(']')) or (word.startswith('<') and word.endswith('>'))):
             count += 1
-    return 1 - count/len(words)
+    
+    # Calculate the score by getting the ratio of the number of non-constant words in the question to the total number of words in the question
+    score_1 = 1 - count/len(question.split())
+    
+    # Calculate the score by getting the ratio of the difference in length between the answer and question to the sum of their lengths
+    question_length = len(question.split()) - count
+    answer_length = len(answer.split())
+    score_2 = (answer_length - question_length)/(answer_length + question_length)
+    
+    return 0.2 * score_1 + 0.2 * score_2
 
 def generate_questions(folderPath='', numberOfTopics=10, numberOfDocuments=3, numberOfSentences=1, topQuestions=10, text='', isText=False):
+    """
+    Generate questions for a given folder path or text.
+
+    Parameters:
+    folderPath (str): The path to the folder containing the documents.
+    numberOfTopics (int): The number of topics to generate questions for.
+    numberOfDocuments (int): The number of documents to consider for each topic.
+    numberOfSentences (int): The number of sentences to consider for each document.
+    topQuestions (int): The number of top questions to select for each sentence.
+    text (str): The text to generate questions for.
+    isText (bool): A flag indicating whether the input is text or a folder path.
+
+    Returns:
+    dict: A dictionary containing the generated questions for each sentence.
+    """
     try:
+        # Perform text summarization to get most important sentences and paragraphs from which sentences are extracted
         sentences, paragraphs = summarization(numberOfTopics, numberOfDocuments, numberOfSentences, folderPath=folderPath, text=text, isText=isText)
-        unigram, bigram, trigram, wordCount, questionTemplates, answerTemplates, questionGaurds, answerGaurds, questionWordCount, questionCount = QG.loadModel('models\\HireUp_Question_Generation\\Trained_Model_Dev')
+        
+        # Load the question generation model
+        unigram, bigram, trigram, wordCount, questionTemplates, answerTemplates, questionGuards, answerGuards, questionWordCount, questionCount = QG.loadModel('models\\HireUp_Question_Generation\\Trained_Model_Dev')
+        
+        # Get the folder name from the folder path
         normalized_path = os.path.normpath(folderPath)
         folder_name = os.path.basename(normalized_path)
+        
+        # Initialize the result dictionary
         result = {
             "name": folder_name,
             "questions": []
         }
         
+        # Generate questions for each sentence
         for sentence in sentences:
             questionsWithScore = []
             uniqueQuestions = set()
+            
+            # Get the sentence structure
             doc, results = QG.getSentenceStructure(sentence)
+            
+            # Skip if the sentence structure is not available
             if results is None:
                 continue
+            
+            # Generate questions for each question template
             for i in range(len(questionTemplates)):
-                question = QG.generateQuestion(sentence, questionTemplates[i], questionGaurds[i])
+                question = QG.generateQuestion(sentence, questionTemplates[i], questionGuards[i])
+                
+                # Skip if the question is already generated
                 if question in uniqueQuestions:
                     continue
-                answer = QG.generateQuestion(sentence, answerTemplates[i], answerGaurds[i])
+                
+                answer = QG.generateQuestion(sentence, answerTemplates[i], answerGuards[i])
+                
+                # Add the question-answer pair to the list if both question and answer are generated
                 if question is not None and answer is not None:
-                    questionsWithScore.append((question, answer, myScore(questionTemplates[i]), QG.calculateScore(question, unigram, bigram, trigram, wordCount, answer, questionWordCount, questionCount)))
+                    score = myScore(questionTemplates[i], question, answer) + 0.6 * QG.calculateScore(question, unigram, bigram, trigram, wordCount, answer, questionWordCount, questionCount)
+                    questionsWithScore.append((question, answer, score))
                     uniqueQuestions.add(question)
-
-            questionsWithScore.sort(key=lambda x: (x[2], x[3]), reverse=True)
+            
+            # Sort the questions based on score in descending order
+            questionsWithScore.sort(key=lambda x: x[2], reverse=True)
+            
+            # Select the top questions
             length = min(topQuestions, len(questionsWithScore))
             question_list = []
             for i in range(length):
@@ -49,6 +113,7 @@ def generate_questions(folderPath='', numberOfTopics=10, numberOfDocuments=3, nu
                 print("Answer: ", questionsWithScore[i][1])
                 question_list.append(questionsWithScore[i][0])
             
+            # Add the questions and answer to the result dictionary
             if question_list:
                 result["questions"].append({
                     "question": question_list,

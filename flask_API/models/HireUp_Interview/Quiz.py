@@ -1,37 +1,47 @@
 import time
+import numpy as np
 from moviepy.editor import VideoFileClip
 import cv2
-import matplotlib.pyplot as plt
-import numpy as np
-from Eye_Cheating import collaboration, eyeCheating
+from Eye_Cheating import calibration, eyeCheating
 from moviepy.editor import VideoFileClip
 import ffmpeg
 import VAD
 import os
 import lip_movements
+import math
 import argparse
-import sys
 import requests
-
 from dotenv import load_dotenv
 
-
-# Note: audio_output is used to get the intervals but i remove it after getting the intervals,
-# so you can change it to any path or make the function get intervals without make an audio file
-# audioOutput = 'audio.wav'
-
 def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, bottomLeftImagePath):
+    """
+    Calculate the eye cheating rate and speaking cheating rate in a video quiz.
+
+    Parameters:
+    videoPath (str): Path to the video file.
+    topLeftImagePath (str): Path to the top left calibration image.
+    topRightImagePath (str): Path to the top right calibration image.
+    bottomRightImagePath (str): Path to the bottom right calibration image.
+    bottomLeftImagePath (str): Path to the bottom left calibration image.
+
+    Returns:
+    eyeCheatingRate (float): The eye cheating rate in the video.
+    speakingCheatingRate (float): The speaking cheating rate in the video.
+    eyeCheatingDurations (list): List of durations where eye cheating occurs.
+    speakingCheatingDurations (list): List of durations where speaking cheating occurs.
+    """
+
+    # Convert video to audio
     audioOutput = os.path.splitext(videoPath)[0] + '.wav'
-    
-    eyeCheatingRate = 0
-    speakingCheatingRate = 0
-    
     if os.path.isfile(audioOutput):
         os.remove(audioOutput)
     ffmpeg.input(videoPath).output(audioOutput).run()
-    intervals = VAD.getLogs(audioOutput)
+
+    # Get speech intervals from audio
+    intervals = VAD.getSpeechIntervals(audioOutput)
     os.remove(audioOutput)
-    
+
+    # Extract frames from video
     video = VideoFileClip(videoPath)
     duration = video.duration
     t = 0
@@ -42,35 +52,56 @@ def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, b
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         frames.append(frame)
         t += 1/fps
-        
+
+    # Load calibration images
     topLeftImage = cv2.cvtColor(cv2.imread(topLeftImagePath), cv2.COLOR_BGR2RGB)
     topRightImage = cv2.cvtColor(cv2.imread(topRightImagePath), cv2.COLOR_BGR2RGB)
     bottomRightImage = cv2.cvtColor(cv2.imread(bottomRightImagePath), cv2.COLOR_BGR2RGB)
     bottomLeftImage = cv2.cvtColor(cv2.imread(bottomLeftImagePath), cv2.COLOR_BGR2RGB)
-    
-    collaborationPoints = collaboration(topLeftImage, topRightImage, bottomRightImage, bottomLeftImage)
-    if collaborationPoints is None:
+
+    # Perform calibration and get calibration points
+    calibrationPoints = calibration(topLeftImage, topRightImage, bottomRightImage, bottomLeftImage)
+    # Check if calibration is successful
+    if calibrationPoints is None:
+        # If calibration is not successful, return eye cheating rate as 1
         eyeCheatingRate = 1
     else:
-        eyeCheatingRate = eyeCheating(frames, collaborationPoints, fps)
-    
+        # Calculate eye cheating rate and durations
+        eyeCheatingRate, eyeCheatingDurations = eyeCheating(frames, calibrationPoints, fps)
+
+    # Initialize variables for overall speaking cheating rate and durations
     t = 0
-    overAllCheatingRate = 0
+    overallSpeakingCheatingRate = 0
+    overallSpeakingCheatingDurations = []
+    # Iterate over speech intervals
     for i, interval in enumerate(intervals):
         t = interval['start']
         frames = []
+        # Extract frames for the interval
         while t < interval['end']:
             frame = video.get_frame(t)
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             frames.append(frame)
             t += 1/fps
+
+        # Calculate speaking cheating rate and durations for the interval
+        cheatingRate, cheatingDurations = lip_movements.cheatingRate(frames)
+        
+        # Adjust durations to the original time scale
+        for i in range(len(cheatingDurations)):
+            cheatingDurations[i] = (cheatingDurations[i][0] + round(interval['start'],1), cheatingDurations[i][1] + round(interval['start'],1))
+            cheatingDurations[i] = (math.floor(cheatingDurations[i][0] * 2) /2, math.ceil(cheatingDurations[i][1] * 2) /2)
             
-        cheatingRate = lip_movements.cheatingRate(frames)
-        overAllCheatingRate += cheatingRate
-    speakingCheatingRate = overAllCheatingRate / max(len(intervals), 1)
+        # Update overall speaking cheating rate and durations
+        overallSpeakingCheatingRate += cheatingRate
+        overallSpeakingCheatingDurations.extend(cheatingDurations)
+        
+    # Merge overlapping durations
+    speakingCheatingDurations = lip_movements.merge_overlapping_durations(overallSpeakingCheatingDurations)
+    speakingCheatingRate = overallSpeakingCheatingRate / len(intervals)
     video.close()
-    
-    return eyeCheatingRate, speakingCheatingRate
+
+    return eyeCheatingRate, speakingCheatingRate # , eyeCheatingDurations, speakingCheatingDurations
 
 
 def wait_for_express_server():
