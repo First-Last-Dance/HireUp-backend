@@ -65,6 +65,7 @@ def Interview(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePa
     # Combine the audio files for analysis
     combined_audio_file = output_folder + '_combined.wav'
     print("combined_audio_file:",combined_audio_file)
+    
     Voice_Analysis.combine_wav_files(output_folder, combined_audio_file)
     
     # Classify the combined audio file to detect emotions

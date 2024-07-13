@@ -3,6 +3,7 @@ import wave
 import numpy as np
 import librosa
 from collections import defaultdict
+import logging
 
 def combine_wav_files(input_folder, output_file):
     """
@@ -16,26 +17,33 @@ def combine_wav_files(input_folder, output_file):
     None
     """
 
-    print("input_folder:",input_folder)
-    # Get a list of all WAV files in the input folder
+    print("input_folder:",input_folder)            
     wav_files = [f for f in os.listdir(input_folder) if f.endswith('.wav')]
-
-    # Initialize an empty list to store the combined frames
     combined_frames = []
+    params = None  # Initialize params to None
 
-    # Read each WAV file and append its frames to the combined frames list
-    for wav_file in wav_files:
-        file_path = os.path.join(input_folder, wav_file)
-        with wave.open(file_path, 'rb') as wf:
-            params = wf.getparams()
-            frames = wf.readframes(params.nframes)
-            combined_frames.append(frames)
-
-    # Write the combined frames to the output file
+    # Initialize the output file with default parameters in case no valid WAV files are found
     with wave.open(output_file, 'wb') as wf:
-        wf.setparams(params)
-        for frames in combined_frames:
-            wf.writeframes(frames)
+        if wav_files:
+            for wav_file in wav_files:
+                file_path = os.path.join(input_folder, wav_file)
+                with wave.open(file_path, 'rb') as wf_read:
+                    if not params:
+                        params = wf_read.getparams()
+                        wf.setparams(params)
+                    frames = wf_read.readframes(params.nframes)
+                    combined_frames.append(frames)
+
+            if combined_frames:
+                for frames in combined_frames:
+                    wf.writeframes(frames)
+            else:
+                logging.warning("No frames were combined. Creating an empty WAV file.")
+                # If no frames were combined, the file is already created but empty
+        else:
+            logging.warning("No WAV files found in the input folder. Creating an empty WAV file.")
+            # Set default parameters for the empty WAV file
+            wf.setparams((1, 2, 16000, 0, 'NONE', 'not compressed'))
             
 def split_audio(file_path, segment_length=4):
     """
@@ -62,9 +70,7 @@ def split_audio(file_path, segment_length=4):
     for start in np.arange(0, total_duration, segment_length):
         end = start + segment_length
 
-        # Check if the end of the segment exceeds the total duration of the audio file
-        if end > total_duration:
-            break
+        end = min(end, total_duration)
 
         # Extract the segment from the audio file
         segment = y[int(start * sr):int(end * sr)]
