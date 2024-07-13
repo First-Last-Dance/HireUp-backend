@@ -1,10 +1,15 @@
 import socket
 import subprocess
+import numpy as np
 from quart import Quart, jsonify, request
 import sys
 import os
 import base64
 import json
+
+from io import BytesIO
+from PIL import Image
+
 
 # Add the directory path of Eye_Cheating.py to the Python path
 sys.path.append(os.path.abspath('models/HireUp_Interview/'))
@@ -116,6 +121,9 @@ def save_calibration_images(pictureUpRight, pictureUpLeft, pictureDownRight, pic
         if image_data is None:
             continue
         
+        # Decode the base64 image
+        image_bytes = base64.b64decode(image_data)
+        
         # Construct the filename
         filename = f"{ApplicationID}_{position}.png"  # Assuming PNG format
         
@@ -124,7 +132,7 @@ def save_calibration_images(pictureUpRight, pictureUpLeft, pictureDownRight, pic
         
         # Write the decoded bytes to a file
         with open(file_path, "wb") as image_file:
-            image_file.write(image_data)
+            image_file.write(image_bytes)
 
 
 
@@ -162,6 +170,26 @@ async def QG_new_socket():
     ip_address = socket.gethostbyname(socket.gethostname())
     return jsonify({'ip_address': ip_address, 'port': port})
 
+def validate_calibration_images(picture_up_right, picture_up_left, picture_down_right, picture_down_left):
+    # Decode the base64 images
+    picture_up_right = base64.b64decode(picture_up_right)
+    picture_up_left = base64.b64decode(picture_up_left)
+    picture_down_right = base64.b64decode(picture_down_right)
+    picture_down_left = base64.b64decode(picture_down_left)
+    # Convert bytes to PIL Image
+    picture_up_right = Image.open(BytesIO(picture_up_right))
+    picture_up_left = Image.open(BytesIO(picture_up_left))
+    picture_down_right = Image.open(BytesIO(picture_down_right))
+    picture_down_left = Image.open(BytesIO(picture_down_left))
+    # Convert PIL Image to NumPy array
+    picture_up_right = np.array(picture_up_right)
+    picture_up_left = np.array(picture_up_left)
+    picture_down_right = np.array(picture_down_right)
+    picture_down_left = np.array(picture_down_left)
+    # Check if the images are valid
+    result = calibration(picture_up_left, picture_up_right,  picture_down_right, picture_down_left)
+    return result
+
 
 @app.route('/quiz_calibration', methods=['POST'])
 async def quiz_save_calibration():
@@ -176,13 +204,8 @@ async def quiz_save_calibration():
     picture_down_left = data.get('PictureDownLeft')
     if not all([picture_up_right, picture_up_left, picture_down_right, picture_down_left]):
         return jsonify({'error': 'All pictures are required'}), 400
-    # Decode the base64 images
-    picture_up_right = base64.b64decode(picture_up_right)
-    picture_up_left = base64.b64decode(picture_up_left)
-    picture_down_right = base64.b64decode(picture_down_right)
-    picture_down_left = base64.b64decode(picture_down_left)
     # check if the images are valid
-    result = calibration(picture_up_left, picture_up_right,  picture_down_right, picture_down_left)
+    result = validate_calibration_images(picture_up_right, picture_up_left, picture_down_right, picture_down_left)
     if result == None:
         return jsonify({'error': 'Calibration images are not valid'}), 400
     save_calibration_images(picture_up_right, picture_up_left, picture_down_right, picture_down_left, application_id, is_quiz)
@@ -201,13 +224,8 @@ async def interview_save_calibration():
     picture_down_left = data.get('PictureDownLeft')
     if not all([picture_up_right, picture_up_left, picture_down_right, picture_down_left]):
         return jsonify({'error': 'All pictures are required'}), 400
-    # Decode the base64 images
-    picture_up_right = base64.b64decode(picture_up_right)
-    picture_up_left = base64.b64decode(picture_up_left)
-    picture_down_right = base64.b64decode(picture_down_right)
-    picture_down_left = base64.b64decode(picture_down_left)
     # check if the images are valid
-    result = calibration(picture_up_left, picture_up_right,  picture_down_right, picture_down_left)
+    result = validate_calibration_images(picture_up_right, picture_up_left, picture_down_right, picture_down_left)
     if result == None:
         return jsonify({'error': 'Calibration images are not valid'}), 400
     save_calibration_images(picture_up_right, picture_up_left, picture_down_right, picture_down_left, application_id, is_quiz)
