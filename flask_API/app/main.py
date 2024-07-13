@@ -8,7 +8,7 @@ import base64
 import json
 
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageFile
 
 
 # Add the directory path of Eye_Cheating.py to the Python path
@@ -171,6 +171,7 @@ async def QG_new_socket():
     return jsonify({'ip_address': ip_address, 'port': port})
 
 def validate_calibration_images(picture_up_right, picture_up_left, picture_down_right, picture_down_left):
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
     try:
         # Decode the base64 images and convert them
         images = [picture_up_right, picture_up_left, picture_down_right, picture_down_left]
