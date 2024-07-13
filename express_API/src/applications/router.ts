@@ -1411,6 +1411,8 @@ applicationRoutes.post(
       questionFaceSpeechCheating,
       questionSimilarity,
       questionEmotions,
+      questionEyeCheatingDurations,
+      questionSpeakingCheatingDurations,
     } = req.body;
     if (
       typeof questionEyeCheating === 'undefined' ||
@@ -1420,12 +1422,16 @@ applicationRoutes.post(
       typeof questionSimilarity === 'undefined' ||
       questionSimilarity === null ||
       typeof questionEmotions === 'undefined' ||
-      questionEmotions === null
+      questionEmotions === null ||
+      typeof questionEyeCheatingDurations === 'undefined' ||
+      questionEyeCheatingDurations === null ||
+      typeof questionSpeakingCheatingDurations === 'undefined' ||
+      questionSpeakingCheatingDurations === null
     ) {
       return res
         .status(400)
         .send(
-          'All questionEyeCheating, questionFaceSpeechCheating, questionSimilarity, and questionEmotions are required',
+          'All questionEyeCheating, questionFaceSpeechCheating, questionSimilarity, questionEyeCheatingDurations, questionSpeakingCheatingDurations , and questionEmotions are required',
         );
     }
     try {
@@ -1435,6 +1441,8 @@ applicationRoutes.post(
         questionFaceSpeechCheating,
         questionSimilarity,
         questionEmotions,
+        questionEyeCheatingDurations,
+        questionSpeakingCheatingDurations,
       );
       res.status(200).send('Interview question data updated successfully');
     } catch (err) {

@@ -13,6 +13,8 @@ export interface InterviewQuestionData {
   questionFaceSpeechCheating?: number;
   questionSimilarity?: number;
   questionEmotions?: EmotionData[];
+  questionEyeCheatingDurations?: Array<any>;
+  questionSpeakingCheatingDurations?: Array<any>;
 }
 
 // Interface representing the structure of data for an application
@@ -82,6 +84,8 @@ const applicationSchema = new Schema({
           percentage: { type: Number },
         },
       ],
+      questionEyeCheatingDurations: [{ type: Array }],
+      questionSpeakingCheatingDurations: [{ type: Array }],
     },
   ],
   quizScore: { type: Number },

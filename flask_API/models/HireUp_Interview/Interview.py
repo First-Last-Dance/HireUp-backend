@@ -75,7 +75,7 @@ def Interview(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePa
     # shutil.rmtree(output_folder)
     # os.remove(combined_audio_file)
     
-    return eyeCheatingRate, speakingCheatingRate, similarity, emotion_percentages # eyeCheatingDurations, speakingCheatingDurations
+    return eyeCheatingRate, speakingCheatingRate, similarity, emotion_percentages , eyeCheatingDurations, speakingCheatingDurations
 
 
 def wait_for_express_server():
@@ -107,7 +107,7 @@ def login():
     else:
         print("Login failed.")
         
-def send_interview_question_data(applicationID, questionEyeCheating, questionFaceSpeechCheating, questionSimilarity, questionEmotions, token):
+def send_interview_question_data(applicationID, questionEyeCheating, questionFaceSpeechCheating, questionSimilarity, questionEmotions, eyeCheatingDurations, speakingCheatingDurations, token):
     # Get the address of the Express server from the environment variable
     express_server_address = os.getenv('EXPRESS_SERVER_ADDRESS', 'http://localhost:3000')
       # Convert numpy.float32 to float
@@ -122,7 +122,7 @@ def send_interview_question_data(applicationID, questionEyeCheating, questionFac
     emotion_percentages_serializable = [{"emotion": emotion, "percentage": percentage} for emotion, percentage in emotion_percentages_serializable.items()]
     # Send a POST request to the Express server to add the topic
     headers = {"Authorization": f"Bearer {token}"}
-    response = requests.post(f"{express_server_address}/application/{applicationID}/interviewQuestionData", json={"questionEyeCheating": questionEyeCheating, "questionFaceSpeechCheating": questionFaceSpeechCheating, "questionSimilarity": questionSimilarity,  "questionEmotions": emotion_percentages_serializable}, headers=headers)
+    response = requests.post(f"{express_server_address}/application/{applicationID}/interviewQuestionData", json={"questionEyeCheating": questionEyeCheating, "questionFaceSpeechCheating": questionFaceSpeechCheating, "questionSimilarity": questionSimilarity,  "questionEmotions": emotion_percentages_serializable, "questionEyeCheatingDurations": eyeCheatingDurations, "questionSpeakingCheatingDurations": speakingCheatingDurations}, headers=headers)
     if response.status_code == 200:
         print(f"Interview Question Data added successfully.")
     else:
@@ -153,7 +153,7 @@ def main():
     token = login()
     
     # Send the interview question data to the Express server
-    send_interview_question_data(args.applicationID, results[0], results[1], results[2], results[3], token)
+    send_interview_question_data(args.applicationID, results[0], results[1], results[2], results[3], results[4], results[5], token)
     
 
 if __name__ == "__main__":

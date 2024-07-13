@@ -582,12 +582,16 @@ export async function addInterviewQuestionData(
   questionFaceSpeechCheating: number,
   questionSimilarity: number,
   questionEmotions: any[],
+  questionEyeCheatingDurations: Array<any>,
+  questionSpeakingCheatingDurations: Array<any>,
 ): Promise<void> {
   const questionData: InterviewQuestionData = {
     questionEyeCheating,
     questionFaceSpeechCheating,
     questionSimilarity,
     questionEmotions,
+    questionEyeCheatingDurations,
+    questionSpeakingCheatingDurations,
   };
   await Application.addInterviewQuestionData(applicationID, questionData).catch(
     (err) => {
