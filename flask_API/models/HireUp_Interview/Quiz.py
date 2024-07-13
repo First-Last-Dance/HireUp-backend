@@ -165,7 +165,7 @@ def main():
 
     args = parser.parse_args()
 
-    eyeCheatingRate, speakingCheatingRate = Quiz(args.videoPath, args.upLeftImagePath, args.upRightImagePath, args.downRightImagePath, args.downLeftImagePath)
+    eyeCheatingRate, speakingCheatingRate, eyeCheatingDurations, speakingCheatingDurations = Quiz(args.videoPath, args.upLeftImagePath, args.upRightImagePath, args.downRightImagePath, args.downLeftImagePath)
 
     print(f"Eye Cheating Rate: {eyeCheatingRate}")
     print(f"Speaking Cheating Rate: {speakingCheatingRate}")
