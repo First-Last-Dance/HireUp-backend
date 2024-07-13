@@ -552,6 +552,8 @@ export async function getApplicationDetails(
     interviewQuestionsData: application.interviewQuestionsData,
     quizScore: application.quizScore,
     averageSimilarity: application.averageSimilarity,
+    quizEyeCheatingDurations: application.quizEyeCheatingDurations,
+    quizSpeakingCheatingDurations: application.quizSpeakingCheatingDurations,
   };
   return { applicant: applicant, application: retrievedApplication };
 }
@@ -560,15 +562,15 @@ export async function addQuizCheatingData(
   applicationID: string,
   quizEyeCheating: number,
   quizFaceSpeechCheating: number,
-  eyeCheatingDurations: Array<any>,
-  speakingCheatingDurations: Array<any>,
+  quizEyeCheatingDurations: Array<any>,
+  quizSpeakingCheatingDurations: Array<any>,
 ): Promise<void> {
   await Application.addQuizCheatingData(
     applicationID,
     quizEyeCheating,
     quizFaceSpeechCheating,
-    eyeCheatingDurations,
-    speakingCheatingDurations,
+    quizEyeCheatingDurations,
+    quizSpeakingCheatingDurations,
   ).catch((err) => {
     throw err;
   });
