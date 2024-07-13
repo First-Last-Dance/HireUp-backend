@@ -75,7 +75,7 @@ def generate_questions(folderPath='', numberOfTopics=10, numberOfDocuments=3, nu
         }
         
         # Generate questions for each sentence
-        for sentence in sentences:
+        for sentence_idx, sentence in enumerate(sentences):
             questionsWithScore = []
             uniqueQuestions = set()
             
@@ -117,7 +117,7 @@ def generate_questions(folderPath='', numberOfTopics=10, numberOfDocuments=3, nu
             if question_list:
                 result["questions"].append({
                     "question": question_list,
-                    "answer": sentence
+                    "answer": paragraphs[sentence_idx]
                 })
         
         return result

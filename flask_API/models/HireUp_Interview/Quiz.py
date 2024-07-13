@@ -68,6 +68,7 @@ def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, b
     if calibrationPoints is None:
         # If calibration is not successful, return eye cheating rate as 1
         eyeCheatingRate = 1
+        eyeCheatingDurations = []
     else:
         # Calculate eye cheating rate and durations
         eyeCheatingRate, eyeCheatingDurations = eyeCheating(frames, calibrationPoints, fps)
