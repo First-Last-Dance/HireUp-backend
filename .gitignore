@@ -141,3 +141,5 @@ __pycache__/
 venv/
 
 flask_API/topics.txt
+
+*.bin
