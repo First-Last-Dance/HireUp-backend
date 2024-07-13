@@ -36,7 +36,10 @@ def merge_intervals(intervals, margin, padding, audio_duration, sampling_rate = 
     intervals.sort(key=lambda x: x['start'])
 
     # Merge overlapping intervals
-    merged = [intervals[0]]
+    if (len(intervals) > 0):
+        merged = [intervals[0]]
+    else:
+        merged = []
     for current in intervals[1:]:
         last = merged[-1]
         if current['start'] <= last['end'] + margin:

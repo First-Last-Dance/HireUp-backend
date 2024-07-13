@@ -56,13 +56,14 @@ def Interview(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePa
     # Calculate the similarity between the applicant's answers and the correct answers
     similarity = Similarity.getSimilarity(applicantAnswers, correctAnswers)
     
+    print("Current working directory:", os.getcwd())
     # Load the trained SVM model for emotion analysis
-    model_filename = 'svm_emotion_model.pkl'
+    model_filename = 'models\HireUp_interview\\svm_emotion_model.pkl'
     svm_model = joblib.load(model_filename)
     output_folder = os.path.splitext(audioOutput)[0]
     
     # Combine the audio files for analysis
-    combined_audio_file = 'combined_audio.wav'
+    combined_audio_file = output_folder + '_combined.wav'
     Voice_Analysis.combine_wav_files(output_folder, combined_audio_file)
     
     # Classify the combined audio file to detect emotions

@@ -85,7 +85,7 @@ def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, b
             t += 1/fps
 
         # Calculate speaking cheating rate and durations for the interval
-        cheatingRate, cheatingDurations = lip_movements.cheatingRate(frames)
+        cheatingRate, cheatingDurations = lip_movements.cheatingRate(frames, fps)
         
         # Adjust durations to the original time scale
         for i in range(len(cheatingDurations)):
@@ -98,10 +98,12 @@ def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, b
         
     # Merge overlapping durations
     speakingCheatingDurations = lip_movements.merge_overlapping_durations(overallSpeakingCheatingDurations)
-    speakingCheatingRate = overallSpeakingCheatingRate / len(intervals)
+    
+    speakingCheatingRate = overallSpeakingCheatingRate /( len(intervals) + 0.00001)
+    
     video.close()
 
-    return eyeCheatingRate, speakingCheatingRate # , eyeCheatingDurations, speakingCheatingDurations
+    return eyeCheatingRate, speakingCheatingRate  , eyeCheatingDurations, speakingCheatingDurations
 
 
 def wait_for_express_server():
