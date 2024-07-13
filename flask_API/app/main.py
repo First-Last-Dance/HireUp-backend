@@ -6,7 +6,9 @@ import os
 import base64
 import json
 
-
+# Add the directory path of Eye_Cheating.py to the Python path
+sys.path.append(os.path.abspath('models/HireUp_Interview/'))
+from Eye_Cheating import calibration
 
 app = Quart(__name__)
 
@@ -177,6 +179,10 @@ async def quiz_save_calibration():
     picture_down_left = data.get('PictureDownLeft')
     if not all([picture_up_right, picture_up_left, picture_down_right, picture_down_left]):
         return jsonify({'error': 'All pictures are required'}), 400
+    # check if the images are valid
+    result = calibration(picture_up_left, picture_up_right,  picture_down_right, picture_down_left)
+    if result == None:
+        return jsonify({'error': 'Calibration images are not valid'}), 400
     save_calibration_images(picture_up_right, picture_up_left, picture_down_right, picture_down_left, application_id, is_quiz)
     return jsonify({'message': 'Calibration images saved'})
 
@@ -193,6 +199,10 @@ async def interview_save_calibration():
     picture_down_left = data.get('PictureDownLeft')
     if not all([picture_up_right, picture_up_left, picture_down_right, picture_down_left]):
         return jsonify({'error': 'All pictures are required'}), 400
+    # check if the images are valid
+    result = calibration(picture_up_left, picture_up_right,  picture_down_right, picture_down_left)
+    if result == None:
+        return jsonify({'error': 'Calibration images are not valid'}), 400
     save_calibration_images(picture_up_right, picture_up_left, picture_down_right, picture_down_left, application_id, is_quiz)
     return jsonify({'message': 'Calibration images saved'})
 
