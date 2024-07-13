@@ -171,24 +171,20 @@ async def QG_new_socket():
     return jsonify({'ip_address': ip_address, 'port': port})
 
 def validate_calibration_images(picture_up_right, picture_up_left, picture_down_right, picture_down_left):
-    # Decode the base64 images
-    picture_up_right = base64.b64decode(picture_up_right)
-    picture_up_left = base64.b64decode(picture_up_left)
-    picture_down_right = base64.b64decode(picture_down_right)
-    picture_down_left = base64.b64decode(picture_down_left)
-    # Convert bytes to PIL Image
-    picture_up_right = Image.open(BytesIO(picture_up_right))
-    picture_up_left = Image.open(BytesIO(picture_up_left))
-    picture_down_right = Image.open(BytesIO(picture_down_right))
-    picture_down_left = Image.open(BytesIO(picture_down_left))
-    # Convert PIL Image to NumPy array
-    picture_up_right = np.array(picture_up_right)
-    picture_up_left = np.array(picture_up_left)
-    picture_down_right = np.array(picture_down_right)
-    picture_down_left = np.array(picture_down_left)
-    # Check if the images are valid
-    result = calibration(picture_up_left, picture_up_right,  picture_down_right, picture_down_left)
-    return result
+    try:
+        # Decode the base64 images and convert them
+        images = [picture_up_right, picture_up_left, picture_down_right, picture_down_left]
+        decoded_images = [base64.b64decode(img) for img in images]
+        pil_images = [Image.open(BytesIO(img)) for img in decoded_images]
+        np_images = [np.array(img) for img in pil_images]
+
+        # Assuming calibration function is defined and accessible
+        result = calibration(*np_images)
+        return result
+    except Exception as e:
+        # Handle errors (e.g., decoding error, file not found, etc.)
+        print(f"An error occurred: {e}")
+        return None
 
 
 @app.route('/quiz_calibration', methods=['POST'])
