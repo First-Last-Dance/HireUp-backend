@@ -1312,23 +1312,36 @@ applicationRoutes.post(
   requireAdmin,
   async (req, res) => {
     const applicationID = req.params.applicationID;
-    const { quizEyeCheating, quizFaceSpeechCheating } = req.body;
+    const {
+      quizEyeCheating,
+      quizFaceSpeechCheating,
+      eyeCheatingDurations,
+      speakingCheatingDurations,
+    } = req.body;
 
     if (
       quizEyeCheating === undefined ||
       quizEyeCheating === null ||
       quizFaceSpeechCheating === undefined ||
-      quizFaceSpeechCheating === null
+      quizFaceSpeechCheating === null ||
+      eyeCheatingDurations === undefined ||
+      eyeCheatingDurations === null ||
+      speakingCheatingDurations === undefined ||
+      speakingCheatingDurations === null
     ) {
       return res
         .status(400)
-        .send('Both quizEyeCheating and quizFaceSpeechCheating are required');
+        .send(
+          'Both quizEyeCheating and quizFaceSpeechCheating and eyeCheatingDurations and speakingCheatingDurations are required',
+        );
     }
     try {
       await Application.addQuizCheatingData(
         applicationID,
         quizEyeCheating,
         quizFaceSpeechCheating,
+        eyeCheatingDurations,
+        speakingCheatingDurations,
       );
       res.status(200).send('Quiz cheating data updated successfully');
     } catch (err) {

@@ -116,9 +116,6 @@ def save_calibration_images(pictureUpRight, pictureUpLeft, pictureDownRight, pic
         if image_data is None:
             continue
         
-        # Decode the base64 image
-        image_bytes = base64.b64decode(image_data)
-        
         # Construct the filename
         filename = f"{ApplicationID}_{position}.png"  # Assuming PNG format
         
@@ -127,7 +124,7 @@ def save_calibration_images(pictureUpRight, pictureUpLeft, pictureDownRight, pic
         
         # Write the decoded bytes to a file
         with open(file_path, "wb") as image_file:
-            image_file.write(image_bytes)
+            image_file.write(image_data)
 
 
 
@@ -179,6 +176,11 @@ async def quiz_save_calibration():
     picture_down_left = data.get('PictureDownLeft')
     if not all([picture_up_right, picture_up_left, picture_down_right, picture_down_left]):
         return jsonify({'error': 'All pictures are required'}), 400
+    # Decode the base64 images
+    picture_up_right = base64.b64decode(picture_up_right)
+    picture_up_left = base64.b64decode(picture_up_left)
+    picture_down_right = base64.b64decode(picture_down_right)
+    picture_down_left = base64.b64decode(picture_down_left)
     # check if the images are valid
     result = calibration(picture_up_left, picture_up_right,  picture_down_right, picture_down_left)
     if result == None:
@@ -199,6 +201,11 @@ async def interview_save_calibration():
     picture_down_left = data.get('PictureDownLeft')
     if not all([picture_up_right, picture_up_left, picture_down_right, picture_down_left]):
         return jsonify({'error': 'All pictures are required'}), 400
+    # Decode the base64 images
+    picture_up_right = base64.b64decode(picture_up_right)
+    picture_up_left = base64.b64decode(picture_up_left)
+    picture_down_right = base64.b64decode(picture_down_right)
+    picture_down_left = base64.b64decode(picture_down_left)
     # check if the images are valid
     result = calibration(picture_up_left, picture_up_right,  picture_down_right, picture_down_left)
     if result == None:

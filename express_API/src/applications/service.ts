@@ -192,10 +192,14 @@ export async function addQuizCheatingData(
   applicationID: string,
   quizEyeCheating: number,
   quizFaceSpeechCheating: number,
+  quizEyeCheatingDurations: Array<any>,
+  quizSpeakingCheatingDurations: Array<any>,
 ): Promise<void> {
   await ApplicationModel.findByIdAndUpdate(applicationID, {
     quizEyeCheating,
     quizFaceSpeechCheating,
+    quizEyeCheatingDurations,
+    quizSpeakingCheatingDurations,
   }).catch((error) => {
     throw error;
   });

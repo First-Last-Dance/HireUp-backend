@@ -139,7 +139,7 @@ def login():
     else:
         print("Login failed.")
         
-def send_quiz_cheating_data(applicationID, eyeCheatingRate, speakingCheatingRate, token):
+def send_quiz_cheating_data(applicationID, eyeCheatingRate, speakingCheatingRate, eyeCheatingDurations, speakingCheatingDurations, token):
     # Get the address of the Express server from the environment variable
     express_server_address = os.getenv('EXPRESS_SERVER_ADDRESS', 'http://localhost:3000')
       # Convert numpy.float32 to float
@@ -148,7 +148,7 @@ def send_quiz_cheating_data(applicationID, eyeCheatingRate, speakingCheatingRate
 
     # Send a POST request to the Express server to add the topic
     headers = {"Authorization": f"Bearer {token}"}
-    response = requests.post(f"{express_server_address}/application/{applicationID}/quizCheatingData", json={"quizEyeCheating": eyeCheatingRate, 'quizFaceSpeechCheating': speakingCheatingRate}, headers=headers)
+    response = requests.post(f"{express_server_address}/application/{applicationID}/quizCheatingData", json={"quizEyeCheating": eyeCheatingRate, 'quizFaceSpeechCheating': speakingCheatingRate, 'eyeCheatingDurations': eyeCheatingDurations, 'speakingCheatingDurations': speakingCheatingDurations}, headers=headers)
     if response.status_code == 200:
         print(f"Quiz Cheating Data added successfully.")
     else:
@@ -180,7 +180,7 @@ def main():
     print(args.applicationID)
     
     # Send the interview question data to the Express server
-    send_quiz_cheating_data(args.applicationID,eyeCheatingRate, speakingCheatingRate, token)
+    send_quiz_cheating_data(args.applicationID, eyeCheatingRate, speakingCheatingRate, eyeCheatingDurations, speakingCheatingDurations, token)
 
 if __name__ == "__main__":
     main()

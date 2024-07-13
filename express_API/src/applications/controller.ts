@@ -560,11 +560,15 @@ export async function addQuizCheatingData(
   applicationID: string,
   quizEyeCheating: number,
   quizFaceSpeechCheating: number,
+  eyeCheatingDurations: Array<any>,
+  speakingCheatingDurations: Array<any>,
 ): Promise<void> {
   await Application.addQuizCheatingData(
     applicationID,
     quizEyeCheating,
     quizFaceSpeechCheating,
+    eyeCheatingDurations,
+    speakingCheatingDurations,
   ).catch((err) => {
     throw err;
   });
