@@ -64,6 +64,7 @@ def Interview(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePa
     
     # Combine the audio files for analysis
     combined_audio_file = output_folder + '_combined.wav'
+    print("combined_audio_file:",combined_audio_file)
     Voice_Analysis.combine_wav_files(output_folder, combined_audio_file)
     
     # Classify the combined audio file to detect emotions
@@ -143,6 +144,7 @@ def main():
     # Call the Interview function with the parsed arguments
     results = Interview(args.videoPath, args.upLeftImagePath, args.upRightImagePath, args.downRightImagePath, args.downLeftImagePath, args.correctAnswer)
     
+    print("Results: ", results)
     # Load environment variables from .env file
     load_dotenv()
     

@@ -16,6 +16,7 @@ def combine_wav_files(input_folder, output_file):
     None
     """
 
+    print("input_folder:",input_folder)
     # Get a list of all WAV files in the input folder
     wav_files = [f for f in os.listdir(input_folder) if f.endswith('.wav')]
 

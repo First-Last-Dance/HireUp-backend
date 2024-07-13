@@ -32,14 +32,17 @@ def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, b
     """
 
     # Convert video to audio
-    audioOutput = os.path.splitext(videoPath)[0] + '.wav'
+    print("videoPath:",os.path.splitext(videoPath))
+    if not os.path.exists(os.path.splitext(videoPath)[0]):
+        os.mkdir(os.path.splitext(videoPath)[0])
+    audioOutput = os.path.splitext(videoPath)[0] + '\\' + os.path.splitext(videoPath.split('\\')[-1])[0]  + '.wav'
     if os.path.isfile(audioOutput):
         os.remove(audioOutput)
     ffmpeg.input(videoPath).output(audioOutput).run()
 
     # Get speech intervals from audio
     intervals = VAD.getSpeechIntervals(audioOutput)
-    os.remove(audioOutput)
+    # os.remove(audioOutput)
 
     # Extract frames from video
     video = VideoFileClip(videoPath)
