@@ -185,8 +185,8 @@ def getSimilarity(s1, s2):
     embedding1 = model_en.get_sentence_vector(tokens1)
     embedding2 = model_en.get_sentence_vector(tokens2)
 
-    embedding1 *= (-1) ** neg_count1
-    embedding2 *= (-1) ** neg_count2
+    # embedding1 *= (-1) ** neg_count1
+    # embedding2 *= (-1) ** neg_count2
 
     embedding1 = embedding1.reshape(1, -1)
     embedding2 = embedding2.reshape(1, -1)
