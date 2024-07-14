@@ -213,4 +213,7 @@ export async function addJobQuestion(
   if (updatedJob.quizRequired && updatedJob.quizAdded) {
     await Job.publishJob(jobID);
   }
+  if (!updatedJob.quizRequired) {
+    await Job.publishJob(jobID);
+  }
 }
