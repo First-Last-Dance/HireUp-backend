@@ -67,6 +67,18 @@ export async function addQuiz(
     throw err;
   });
 
+  const updatedJob = await Job.quizAddedToJob(jobID).catch((err) => {
+    throw err;
+  });
+
+  if (!updatedJob) {
+    throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
+  }
+
+  if (updatedJob.interviewAdded) {
+    await Job.publishJob(jobID);
+  }
+
   return quiz._id;
 }
 
