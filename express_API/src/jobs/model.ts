@@ -20,6 +20,8 @@ export interface JobData {
   published?: boolean;
   questions?: QuestionData[];
   numberOfInterviewQuestions?: number;
+  quizAdded?: boolean;
+  interviewAdded?: boolean;
 }
 export interface IJob extends Document {
   title: string;
@@ -35,6 +37,8 @@ export interface IJob extends Document {
   createdAt: Date;
   questions?: QuestionData[];
   numberOfInterviewQuestions?: number;
+  quizAdded?: boolean;
+  interviewAdded?: boolean;
 }
 
 const jobSchema: Schema = new Schema({
@@ -50,10 +54,12 @@ const jobSchema: Schema = new Schema({
   quizDeadline: { type: Date, required: true },
   interviewDeadline: { type: Date, required: true },
   quizRequired: { type: Boolean, required: true },
-  published: { type: Boolean, default: true },
+  published: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   questions: { type: Array },
   numberOfInterviewQuestions: { type: Number },
+  quizAdded: { type: Boolean, default: false },
+  interviewAdded: { type: Boolean, default: false },
 });
 
 const Job = mongoose.model<IJob>('Job', jobSchema);

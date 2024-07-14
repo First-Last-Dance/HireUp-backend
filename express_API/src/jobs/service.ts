@@ -157,6 +157,31 @@ export async function addQuestionsToJob(
     {
       questions: questions,
       numberOfInterviewQuestions,
+      interviewAdded: true,
+    },
+    { new: true },
+  ).catch((error) => {
+    throw error;
+  });
+}
+
+export async function publishJob(jobID: string): Promise<IJob | null> {
+  return JobModel.findByIdAndUpdate(
+    jobID,
+    {
+      published: true,
+    },
+    { new: true },
+  ).catch((error) => {
+    throw error;
+  });
+}
+
+export async function quizAddedToJob(jobID: string): Promise<IJob | null> {
+  return JobModel.findByIdAndUpdate(
+    jobID,
+    {
+      quizAdded: true,
     },
     { new: true },
   ).catch((error) => {

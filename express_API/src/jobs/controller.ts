@@ -167,6 +167,9 @@ export async function getJobsByCompany(
       quizDeadline: job.quizDeadline,
       interviewDeadline: job.interviewDeadline,
       quizRequired: job.quizRequired,
+      quizAdded: job.quizAdded,
+      interviewAdded: job.interviewAdded,
+      published: job.published,
     });
   });
   return jobsArr;
@@ -197,11 +200,20 @@ export async function addJobQuestion(
   ) {
     throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
   }
-  await Job.addQuestionsToJob(
+  const updatedJob = await Job.addQuestionsToJob(
     jobID,
     questions,
     numberOfInterviewQuestions,
   ).catch((err) => {
     throw err;
   });
+  if (!updatedJob) {
+    throw new CodedError(ErrorMessage.JobNotFound, ErrorCode.NotFound);
+  }
+  if (updatedJob.quizRequired && updatedJob.quizAdded) {
+    await Job.publishJob(jobID);
+  }
+  if (!updatedJob.quizRequired) {
+    await Job.publishJob(jobID);
+  }
 }
