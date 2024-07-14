@@ -84,8 +84,10 @@ def extract_text_from_pdf(pdf_path):
         pattern = re.compile(r'-\s*\n')
         text = pattern.sub('', text)
         # Remove line breaks that are not followed by a period or colon
-        pattern = re.compile(r'[^\.:]\s*\n')
-        text = pattern.sub(' ', text)
+        # pattern = re.compile(r'[^\.:]\s*\n')
+        # text = pattern.sub(' ', text)
+        text = re.sub(r'\s+(?=\n)', '', text)
+        text = re.sub(r'(?<![.:])\n', ' ', text)
     # Return the extracted text
     return text
 
@@ -171,16 +173,18 @@ def getDocuments_from_pdf(filePath, original_documents=None, preprocessed_docume
     # Split the text into individual documents based on certain patterns
     pattern = re.compile(r'[\.:]\s*\n')
     documents = pattern.split(text)
+    print("len_documents:",len(documents))
 
     # Calculate the lengths of each document
     document_lengths = [len(document) for document in documents]
 
     # Get the lower and upper bounds for outlier document lengths
     lower_bound, upper_bound = get_outliers_boundary(document_lengths)
-
+    print("lower_bound:",lower_bound)
     # Process each document
     for document in documents:
         if len(document) > lower_bound:
+            # print("Entered")
             # Check for grammar and spelling errors in the document
             matches = tool.check(document)
             document = language_tool_python.utils.correct(document, matches)
@@ -210,8 +214,10 @@ def getAllDocuments(folderPath):
 
     """
     # Get the list of files in the folder
+    print("Current working directory:", os.getcwd())
+    print("Folder path:", folderPath)
     dir_list = os.listdir(folderPath)
-
+    print("dir_list:",dir_list)
     # Initialize empty lists for original documents, preprocessed documents, and vocabulary
     original_documents = []
     preprocessed_documents = []
@@ -222,6 +228,7 @@ def getAllDocuments(folderPath):
         # Create the file path by concatenating the folder path and file name
         file_path = folderPath + file_name
 
+        print("file_path:",file_path)
         # Call the getDocuments_from_pdf function to extract documents from the PDF file
         original_documents, preprocessed_documents, vocabulary = getDocuments_from_pdf(file_path, original_documents, preprocessed_documents, vocabulary)
 
@@ -418,7 +425,7 @@ def Summarize_Document(document, num_sentences):
     summarization = []
     
     # Get the top sentences based on the SVD matrix
-    top_sentence_indices = np.abs(U[:, i]).argsort()[-num_sentences:][::-1]
+    top_sentence_indices = np.abs(U[:, 0]).argsort()[-num_sentences:][::-1]
     
     # Sort the sentence indices
     top_sentence_indices.sort()
@@ -559,29 +566,36 @@ def summarization(numberOfTopics, numberOfDocuments, numberOfSentences, folderPa
     if isText:
         original_documents, preprocessed_documents, vocabulary = getAllDocumentsFromGivenString(text)
     else:
+        print("=========== 1_1 ==============")
         original_documents, preprocessed_documents, vocabulary = getAllDocuments(folderPath)
         
 
     # Compute sentence embeddings or TF-IDF for the preprocessed documents
+    print("=========== 1_2 ==============")
+    print(len(preprocessed_documents))
     documentsEmbeddings = getDocumentsVector(preprocessed_documents)
     # tfidf_matrix = TF_IDF(preprocessed_documents, vocabulary)
 
     # Perform Singular Value Decomposition (SVD) on the document embeddings
+    print("=========== 1_3 ==============")
     U, s, V = SVD_Np(documentsEmbeddings)
 
     # Get the top N documents in each of the top M topics
+    print("=========== 1_4 ==============")
     top_N_document_in_top_M_topic, documents_indeces = get_top_N_documents_in_top_M_topics(U, original_documents, numberOfDocuments, numberOfTopics)
 
     # Keep track of unique sentences to avoid duplicates
     unique_sentences = set()
 
     # Iterate over the top N documents in each of the top M topics
+    print("=========== 1_5 ==============")
     for idx, document in enumerate(top_N_document_in_top_M_topic):
         if document == '':
             continue
 
         # Summarize the document and get the most important sentences
         summarization = Summarize_Document(document, numberOfSentences)
+        print("=========== 1_6 ==============")
 
         # Iterate over the summarized sentences
         for sentence in summarization:
