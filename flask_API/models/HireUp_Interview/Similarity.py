@@ -11,12 +11,11 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import nltk
 import os
+import sys
 
-nltk.download('punkt')
-nltk.download('stopwords')
+nltk.download('punkt', quiet=True)
+nltk.download('stopwords', quiet=True)
 
-
-model_en = fasttext.load_model("models\HireUp_interview\\cc.en.300.bin")
 print("Current working directory:", os.getcwd())
 
 
@@ -169,6 +168,13 @@ def countNegations(tokens):
 
 
 def getSimilarity(s1, s2):
+    
+    try:
+        model_en = fasttext.load_model("models\HireUp_interview\\cc.en.300.bin")
+    except Exception as e:
+        print("Error: ", e)
+        sys.exit(1)
+
     s1 = s1.lower()
     s2 = s2.lower()
     

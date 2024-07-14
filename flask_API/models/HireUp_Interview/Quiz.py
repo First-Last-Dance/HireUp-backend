@@ -12,8 +12,9 @@ import math
 import argparse
 import requests
 from dotenv import load_dotenv
+import sys
 
-def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, bottomLeftImagePath):
+def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, bottomLeftImagePath, isQuiz = True):
     """
     Calculate the eye cheating rate and speaking cheating rate in a video quiz.
 
@@ -48,12 +49,17 @@ def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, b
     video = VideoFileClip(videoPath)
     duration = video.duration
     t = 0
-    frames = []
+    videoFrames = []
     fps = round(video.fps)
+    
+    if fps > 15:
+        video = video.set_fps(15)
+        fps = round(video.fps)
+    
     while t <= duration:
         frame = video.get_frame(t)
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        frames.append(frame)
+        videoFrames.append(frame)
         t += 1/fps
 
     # Load calibration images
@@ -71,7 +77,7 @@ def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, b
         eyeCheatingDurations = []
     else:
         # Calculate eye cheating rate and durations
-        eyeCheatingRate, eyeCheatingDurations = eyeCheating(frames, calibrationPoints, fps)
+        eyeCheatingRate, eyeCheatingDurations = eyeCheating(videoFrames, calibrationPoints, fps)
 
     # Initialize variables for overall speaking cheating rate and durations
     t = 0
@@ -89,7 +95,7 @@ def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, b
             t += 1/fps
 
         # Calculate speaking cheating rate and durations for the interval
-        cheatingRate, cheatingDurations = lip_movements.cheatingRate(frames, fps)
+        cheatingRate, cheatingDurations = lip_movements.cheatingRate(frames, fps, isQuiz)
         
         # Adjust durations to the original time scale
         for i in range(len(cheatingDurations)):
@@ -103,7 +109,10 @@ def Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, b
     # Merge overlapping durations
     speakingCheatingDurations = lip_movements.merge_overlapping_durations(overallSpeakingCheatingDurations)
     
-    speakingCheatingRate = overallSpeakingCheatingRate /( len(intervals) + 0.00001)
+    if isQuiz:
+        speakingCheatingRate = overallSpeakingCheatingRate / len(videoFrames)
+    else:
+        speakingCheatingRate = overallSpeakingCheatingRate / (len(intervals) + 0.00001)
     
     video.close()
 
@@ -183,4 +192,6 @@ def main():
     send_quiz_cheating_data(args.applicationID, eyeCheatingRate, speakingCheatingRate, eyeCheatingDurations, speakingCheatingDurations, token)
 
 if __name__ == "__main__":
+    # Redirect stderr to the null device
+    sys.stderr = open(os.devnull, 'w')
     main()

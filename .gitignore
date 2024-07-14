@@ -143,3 +143,7 @@ venv/
 flask_API/topics.txt
 
 *.bin
+*.webm
+*.png
+*.jpg
+*.wav

@@ -10,6 +10,7 @@ import argparse
 import ffmpeg
 from dotenv import load_dotenv
 import speech_recognition as sr
+import sys
 
 
 def Interview(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, bottomLeftImagePath, correctAnswers):
@@ -51,7 +52,7 @@ def Interview(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePa
         applicantAnswers = ""
     
     # Perform eye cheating detection and get cheating rates and durations
-    eyeCheatingRate, speakingCheatingRate, eyeCheatingDurations, speakingCheatingDurations = Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, bottomLeftImagePath)
+    eyeCheatingRate, speakingCheatingRate, eyeCheatingDurations, speakingCheatingDurations = Quiz(videoPath, topLeftImagePath, topRightImagePath, bottomRightImagePath, bottomLeftImagePath, isQuiz=False)
     
     # Calculate the similarity between the applicant's answers and the correct answers
     similarity = Similarity.getSimilarity(applicantAnswers, correctAnswers)
@@ -157,4 +158,7 @@ def main():
     
 
 if __name__ == "__main__":
+    # Redirect stderr to the null device
+    sys.stderr = open(os.devnull, 'w')
+    print("Before main")
     main()

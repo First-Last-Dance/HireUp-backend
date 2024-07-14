@@ -3,7 +3,7 @@ import mediapipe as mp
 import math
 from Frames_To_Durations import frame_indices_to_durations, merge_overlapping_durations
 
-def cheatingRate(frames, fps):
+def cheatingRate(frames, fps, isQuiz = True):
     """
     Calculates the cheating rate based on lip movements in a sequence of frames.
 
@@ -38,7 +38,7 @@ def cheatingRate(frames, fps):
     threshold = 0.04
     
     # Interval of voting frames
-    interval = 3
+    interval = 5
     
     # Initialize variables
     previousDistance = 0
@@ -113,4 +113,8 @@ def cheatingRate(frames, fps):
     # Merge overlapping durations
     merged_durations = merge_overlapping_durations(durations)
     
-    return sum(cheatingRate) / len(cheatingRate), merged_durations
+    if isQuiz:
+        return sum(cheatingRate) * interval, merged_durations
+    
+    else:
+        return sum(cheatingRate) / len(cheatingRate), merged_durations

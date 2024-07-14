@@ -60,27 +60,22 @@ def generate_questions(folderPath='', numberOfTopics=10, numberOfDocuments=3, nu
     try:
         # Perform text summarization to get most important sentences and paragraphs from which sentences are extracted
         
-        print("============= 1 ===================")
         sentences, paragraphs = summarization(numberOfTopics, numberOfDocuments, numberOfSentences, folderPath=folderPath, text=text, isText=isText)
         
         # Load the question generation model
-        print("============= 2 ===================")
         unigram, bigram, trigram, wordCount, questionTemplates, answerTemplates, questionGuards, answerGuards, questionWordCount, questionCount = QG.loadModel('models\\HireUp_Question_Generation\\Trained_Model_Dev')
         
         # Get the folder name from the folder path
-        print("============= 3 ===================")
         normalized_path = os.path.normpath(folderPath)
         folder_name = os.path.basename(normalized_path)
         
         # Initialize the result dictionary
-        print("============= 4 ===================")
         result = {
             "name": folder_name,
             "questions": []
         }
         
         # Generate questions for each sentence
-        print("============= 5 ===================")
         for sentence_idx, sentence in enumerate(sentences):
             questionsWithScore = []
             uniqueQuestions = set()

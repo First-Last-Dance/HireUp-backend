@@ -35,8 +35,8 @@ function Is-VenvDirectoryPresent {
 # Function to install dependencies if needed
 function Install-Dependencies {
     Write-Host "Installing dependencies..."
-    pip install -r requirements.txt --ignore-installed
-    python -m spacy download en_core_web_sm
+    # pip install -r requirements.txt --ignore-installed
+    # python -m spacy download en_core_web_sm
 }
 
 # Function to check if all dependencies from requirements.txt are installed

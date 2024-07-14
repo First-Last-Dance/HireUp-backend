@@ -292,6 +292,8 @@ def eyeCheating(frames, calibrationPoints, fps):
             # Calculate scale factor
             scale = eculedian_distance(mesh_points[LEFT_EYE_MOST_LEFT], mesh_points[LEFT_EYE_MOST_RIGHT]) / eculedian_distance(left_eye_most_left_ref, left_eye_most_right_ref)
             
+            scale *= 1.3
+            
             # Initialize list for new mapping points after transformations
             new_mapping_points = []
             for point in mapping_points:
