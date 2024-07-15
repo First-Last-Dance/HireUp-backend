@@ -34,7 +34,10 @@ def get_outliers_boundary(data):
     """
     q1 = np.percentile(data, 25)
     q3 = np.percentile(data, 75)
-    return q1, q3
+    iqr = q3 - q1
+    lower_bound = q1 - 1.5 * iqr
+    upper_bound = q3 + 1.5 * iqr
+    return lower_bound, upper_bound
 
 def extract_text_from_pdf(pdf_path):
     """
@@ -602,6 +605,10 @@ def summarization(numberOfTopics, numberOfDocuments, numberOfSentences, folderPa
             # Iterate over the indices of the top documents in each topic
             for index in documents_indeces[idx]:
                 originalDoc = original_documents[index]
+                
+                sentence = sentence.strip()
+                sentence = sentence.strip('.')
+                sentence = sentence.strip(':')
 
                 # Check if the sentence is present in the original document and is not a duplicate
                 if sentence in originalDoc and sentence not in unique_sentences:
